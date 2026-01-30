@@ -21,6 +21,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _amountController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   String? _selectedSource;
+  String _selectedCurrency = 'UAH';
 
   final List<String> _incomeSources = [
     'Renesas',
@@ -95,22 +96,50 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: _amountController,
-                decoration: const InputDecoration(
-                  labelText: 'Amount',
-                  prefixText: '\$',
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an amount';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
-                  }
-                  return null;
-                },
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _amountController,
+                      decoration: const InputDecoration(
+                        labelText: 'Amount',
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter an amount';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 120,
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedCurrency,
+                      decoration: const InputDecoration(
+                        labelText: 'Currency',
+                      ),
+                      items: ['UAH', 'USD', 'EUR'].map((c) {
+                        return DropdownMenuItem(
+                          value: c,
+                          child: Text(c),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _selectedCurrency = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
