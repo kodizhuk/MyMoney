@@ -100,9 +100,22 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   double get _totalExpenses {
     return _expenseTransactions.fold(0, (sum, transaction) => sum + transaction.amount);
   }
-
   String _formatTotal() {
-    return 'Total Expenses: \$${_totalExpenses.toStringAsFixed(2)}';
+    String symbol = '₴';
+    if (_expenseTransactions.isNotEmpty) {
+      switch (_expenseTransactions.first.currency) {
+        case 'USD':
+          symbol = r'$';
+          break;
+        case 'EUR':
+          symbol = '€';
+          break;
+        case 'UAH':
+        default:
+          symbol = '₴';
+      }
+    }
+    return 'Total Expenses: $symbol${_totalExpenses.toStringAsFixed(2)}';
   }
 
   @override

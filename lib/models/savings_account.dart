@@ -3,12 +3,16 @@ class SavingsAccount {
   final String name;
   final double amount;
   final String? notes;
+  final String currency;
+  final double usdRate;
 
   SavingsAccount({
     this.id,
     required this.name,
     required this.amount,
     this.notes,
+    this.currency = 'UAH',
+    this.usdRate = 42,
   });
 
   SavingsAccount copyWith({
@@ -16,12 +20,16 @@ class SavingsAccount {
     String? name,
     double? amount,
     String? notes,
+    String? currency,
+    double? usdRate,
   }) {
     return SavingsAccount(
       id: id ?? this.id,
       name: name ?? this.name,
       amount: amount ?? this.amount,
       notes: notes ?? this.notes,
+      currency: currency ?? this.currency,
+      usdRate: usdRate ?? this.usdRate,
     );
   }
 
@@ -30,6 +38,8 @@ class SavingsAccount {
       'name': name,
       'amount': amount,
       'notes': notes,
+      'currency': currency,
+      'usd_rate': usdRate,
     };
     if (id != null) {
       map['id'] = id;
@@ -43,6 +53,8 @@ class SavingsAccount {
       name: map['name'],
       amount: map['amount'],
       notes: map['notes'],
+      currency: map['currency'] ?? 'UAH',
+      usdRate: (map['usd_rate'] as num?)?.toDouble() ?? 42.0,
     );
   }
 }

@@ -16,7 +16,19 @@ class SavingsAccountWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$');
+    String symbol;
+    switch (account.currency) {
+      case 'USD':
+        symbol = r'$';
+        break;
+      case 'EUR':
+        symbol = '€';
+        break;
+      case 'UAH':
+      default:
+        symbol = '₴';
+    }
+    final currencyFormat = NumberFormat.currency(symbol: symbol);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

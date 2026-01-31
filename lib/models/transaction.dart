@@ -5,6 +5,8 @@ class Transaction {
   final String name;
   final double amount;
   final String? source; // can be null for some types
+  final String currency;
+  final double usdRate;
 
   Transaction({
     this.id,
@@ -13,6 +15,8 @@ class Transaction {
     required this.name,
     required this.amount,
     this.source,
+    this.currency = 'UAH',
+    this.usdRate = 42,
   });
 
   Transaction copyWith({
@@ -22,6 +26,8 @@ class Transaction {
     String? name,
     double? amount,
     String? source,
+    String? currency,
+    double? usdRate,
   }) {
     return Transaction(
       id: id ?? this.id,
@@ -30,6 +36,8 @@ class Transaction {
       name: name ?? this.name,
       amount: amount ?? this.amount,
       source: source ?? this.source,
+      currency: currency ?? this.currency,
+      usdRate: usdRate ?? this.usdRate,
     );
   }
 
@@ -40,6 +48,8 @@ class Transaction {
       'name': name,
       'amount': amount,
       'source': source,
+      'currency': currency,
+      'usd_rate': usdRate,
     };
     if (id != null) {
       map['id'] = id;
@@ -55,6 +65,8 @@ class Transaction {
       name: map['name'],
       amount: map['amount'],
       source: map['source'],
+      currency: map['currency'] ?? 'UAH',
+      usdRate: (map['usd_rate'] as num?)?.toDouble() ?? 42.0,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/savings_account.dart';
+import '../services/database_service.dart';
 
 class AddEditSavingsAccountScreen extends StatefulWidget {
   final SavingsAccount? account;
@@ -24,6 +25,7 @@ class _AddEditSavingsAccountScreenState extends State<AddEditSavingsAccountScree
       _nameController.text = widget.account!.name;
       _amountController.text = widget.account!.amount.toString();
       _notesController.text = widget.account!.notes ?? '';
+      _selectedCurrency = widget.account!.currency;
     }
   }
 
@@ -125,16 +127,34 @@ class _AddEditSavingsAccountScreenState extends State<AddEditSavingsAccountScree
     );
   }
 
-  void _saveAccount() {
+  void _saveAccount() async {
     if (_formKey.currentState!.validate()) {
-      final account = SavingsAccount(
-        id: widget.account?.id,
-        name: _nameController.text,
-        amount: double.parse(_amountController.text),
-        notes: _notesController.text.isEmpty ? null : _notesController.text,
-      );
+      try {
+        final rates = await DatabaseService().getExchangeRates();
+        final usdRate = rates['usd'] ?? 42.0;
+        final account = SavingsAccount(
+          id: widget.account?.id,
+          name: _nameController.text,
+          amount: double.parse(_amountController.text),
+          notes: _notesController.text.isEmpty ? null : _notesController.text,
+          currency: _selectedCurrency,
+          usdRate: usdRate,
+        );
 
-      Navigator.pop(context, account);
+        Navigator.pop(context, account);
+      } catch (e) {
+        // fallback to default rate
+        final account = SavingsAccount(
+          id: widget.account?.id,
+          name: _nameController.text,
+          amount: double.parse(_amountController.text),
+          notes: _notesController.text.isEmpty ? null : _notesController.text,
+          currency: _selectedCurrency,
+          usdRate: 42.0,
+        );
+
+        Navigator.pop(context, account);
+      }
     }
   }
 

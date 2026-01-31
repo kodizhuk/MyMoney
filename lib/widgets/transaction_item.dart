@@ -23,8 +23,20 @@ class _TransactionItemState extends State<TransactionItem> {
 
   @override
   Widget build(BuildContext context) {
+    String symbol;
+    switch (widget.transaction.currency) {
+      case 'USD':
+        symbol = r'$';
+        break;
+      case 'EUR':
+        symbol = '€';
+        break;
+      case 'UAH':
+      default:
+        symbol = '₴';
+    }
     final currencyFormat = NumberFormat.currency(
-      symbol: '\$',
+      symbol: symbol,
       decimalDigits: 2,
     );
 

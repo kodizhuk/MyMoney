@@ -100,15 +100,41 @@ class _IncomeScreenState extends State<IncomeScreen> {
   double get _totalIncome {
     return _incomeTransactions.fold(0, (sum, transaction) => sum + transaction.amount);
   }
-
   String _formatTotal() {
-    return 'Total Income: \$${_totalIncome.toStringAsFixed(2)}';
+    String symbol = '₴';
+    if (_incomeTransactions.isNotEmpty) {
+      switch (_incomeTransactions.first.currency) {
+        case 'USD':
+          symbol = r'$';
+          break;
+        case 'EUR':
+          symbol = '€';
+          break;
+        case 'UAH':
+        default:
+          symbol = '₴';
+      }
+    }
+    return 'Total Income: $symbol${_totalIncome.toStringAsFixed(2)}';
   }
 
   String _calculateTithe() {
-    // Calculate tithe as 10% of total income
-    final tithe = _totalIncome * 0.1; // 10% tithe
-    return '${tithe.toStringAsFixed(2)} USD';
+    final tithe = _totalIncome * 0.1;
+    String symbol = '₴';
+    if (_incomeTransactions.isNotEmpty) {
+      switch (_incomeTransactions.first.currency) {
+        case 'USD':
+          symbol = r'$';
+          break;
+        case 'EUR':
+          symbol = '€';
+          break;
+        case 'UAH':
+        default:
+          symbol = '₴';
+      }
+    }
+    return '${tithe.toStringAsFixed(2)} $symbol';
   }
 
   @override

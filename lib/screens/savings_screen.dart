@@ -136,7 +136,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
             padding: const EdgeInsets.all(16),
             alignment: Alignment.centerLeft,
             child: Text(
-              'Total Savings: \$${_totalSavings.toStringAsFixed(2)}',
+              'Total Savings: ${_formatTotalSavings()}',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -193,5 +193,23 @@ class _SavingsScreenState extends State<SavingsScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  String _formatTotalSavings() {
+    String symbol = '₴';
+    if (_savingsAccounts.isNotEmpty) {
+      switch (_savingsAccounts.first.currency) {
+        case 'USD':
+          symbol = r'$';
+          break;
+        case 'EUR':
+          symbol = '€';
+          break;
+        case 'UAH':
+        default:
+          symbol = '₴';
+      }
+    }
+    return '$symbol${_totalSavings.toStringAsFixed(2)}';
   }
 }

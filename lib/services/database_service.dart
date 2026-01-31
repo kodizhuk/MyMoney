@@ -15,6 +15,8 @@ class TransactionsFields {
   static const String name = 'name';
   static const String amount = 'amount';
   static const String source = 'source';
+  static const String currency = 'currency';
+  static const String usdRate = 'usd_rate';
 }
 
 class SavingsAccountsFields {
@@ -24,6 +26,14 @@ class SavingsAccountsFields {
   static const String name = 'name';
   static const String amount = 'amount';
   static const String notes = 'notes';
+  static const String currency = 'currency';
+  static const String usdRate = 'usd_rate';
+}
+
+class SettingsFields {
+  static const String tableName = 'settings';
+  static const String usdRate = 'usd_rate';
+  static const String eurRate = 'eur_rate';
 }
 
 class DatabaseService {
@@ -54,7 +64,7 @@ class DatabaseService {
     String path = join(await getDatabasesPath(), 'money_tracker.db');
     return await openDatabase(
       path,
-      version: 2,
+      version: 5,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -68,7 +78,8 @@ class DatabaseService {
         date TEXT NOT NULL,
         name TEXT NOT NULL,
         amount REAL NOT NULL,
-        source TEXT
+        source TEXT,
+        currency TEXT NOT NULL DEFAULT 'UAH'
       )
     ''');
 
@@ -77,7 +88,14 @@ class DatabaseService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         amount REAL NOT NULL,
-        notes TEXT
+        notes TEXT,
+        currency TEXT NOT NULL DEFAULT 'UAH'
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE settings (
+        usd_rate REAL NOT NULL DEFAULT 42,
+        eur_rate REAL NOT NULL DEFAULT 51
       )
     ''');
   }
@@ -93,13 +111,71 @@ class DatabaseService {
           notes TEXT
         )
       ''');
+      oldVersion = 2;
+    }
+
+    if (oldVersion < 3) {
+      // Add currency column to transactions and savings_accounts for version 3
+      await db.execute('ALTER TABLE ${TransactionsFields.tableName} ADD COLUMN ${TransactionsFields.currency} TEXT NOT NULL DEFAULT "UAH"');
+      await db.execute('ALTER TABLE ${SavingsAccountsFields.tableName} ADD COLUMN ${SavingsAccountsFields.currency} TEXT NOT NULL DEFAULT "UAH"');
+      oldVersion = 3;
+    }
+
+    if (oldVersion < 4) {
+      // Create settings table for version 4
+      await db.execute('''
+        CREATE TABLE settings (
+          usd_rate REAL NOT NULL DEFAULT 42,
+          eur_rate REAL NOT NULL DEFAULT 51
+        )
+      ''');
+    }
+  }
+
+  // Settings operations
+  Future<Map<String, double>> getExchangeRates() async {
+    Database db = await database;
+    try {
+      final rows = await db.query(SettingsFields.tableName, limit: 1);
+      if (rows.isNotEmpty) {
+        final row = rows.first;
+        return {
+          'usd': (row[SettingsFields.usdRate] as num).toDouble(),
+          'eur': (row[SettingsFields.eurRate] as num).toDouble(),
+        };
+      }
+    } catch (_) {
+      // table may not exist yet
+    }
+    return {'usd': 42.0, 'eur': 51.0};
+  }
+
+  Future<void> setExchangeRates(double usdRate, double eurRate) async {
+    Database db = await database;
+    try {
+      final rows = await db.query(SettingsFields.tableName, limit: 1);
+      final data = {SettingsFields.usdRate: usdRate, SettingsFields.eurRate: eurRate};
+      if (rows.isNotEmpty) {
+        await db.update(SettingsFields.tableName, data);
+      } else {
+        await db.insert(SettingsFields.tableName, data);
+      }
+    } catch (_) {
+      // table may not exist yet, skip
     }
   }
 
   // Transaction CRUD operations
   Future<int> insertTransaction(model.Transaction transaction) async {
     Database db = await database;
-    return await db.insert(TransactionsFields.tableName, transaction.toMap());
+    try {
+      return await db.insert(TransactionsFields.tableName, transaction.toMap());
+    } catch (e) {
+      // If insert fails (e.g., column doesn't exist), try without usd_rate
+      final map = transaction.toMap();
+      map.remove('usd_rate');
+      return await db.insert(TransactionsFields.tableName, map);
+    }
   }
 
   Future<List<model.Transaction>> getTransactions(String type) async {
@@ -115,12 +191,24 @@ class DatabaseService {
 
   Future<int> updateTransaction(model.Transaction transaction) async {
     Database db = await database;
-    return await db.update(
-      TransactionsFields.tableName,
-      transaction.toMap(),
-      where: '${TransactionsFields.id} = ?',
-      whereArgs: [transaction.id],
-    );
+    try {
+      return await db.update(
+        TransactionsFields.tableName,
+        transaction.toMap(),
+        where: '${TransactionsFields.id} = ?',
+        whereArgs: [transaction.id],
+      );
+    } catch (e) {
+      // If update fails, try without usd_rate
+      final map = transaction.toMap();
+      map.remove('usd_rate');
+      return await db.update(
+        TransactionsFields.tableName,
+        map,
+        where: '${TransactionsFields.id} = ?',
+        whereArgs: [transaction.id],
+      );
+    }
   }
 
   Future<int> deleteTransaction(int id) async {
@@ -144,7 +232,14 @@ class DatabaseService {
   // Savings Account CRUD operations
   Future<int> insertSavingsAccount(SavingsAccount savingsAccount) async {
     Database db = await database;
-    return await db.insert(SavingsAccountsFields.tableName, savingsAccount.toMap());
+    try {
+      return await db.insert(SavingsAccountsFields.tableName, savingsAccount.toMap());
+    } catch (e) {
+      // If insert fails (e.g., column doesn't exist), try without usd_rate
+      final map = savingsAccount.toMap();
+      map.remove('usd_rate');
+      return await db.insert(SavingsAccountsFields.tableName, map);
+    }
   }
 
   Future<List<SavingsAccount>> getSavingsAccounts() async {
@@ -155,12 +250,24 @@ class DatabaseService {
 
   Future<int> updateSavingsAccount(SavingsAccount savingsAccount) async {
     Database db = await database;
-    return await db.update(
-      SavingsAccountsFields.tableName,
-      savingsAccount.toMap(),
-      where: '${SavingsAccountsFields.id} = ?',
-      whereArgs: [savingsAccount.id],
-    );
+    try {
+      return await db.update(
+        SavingsAccountsFields.tableName,
+        savingsAccount.toMap(),
+        where: '${SavingsAccountsFields.id} = ?',
+        whereArgs: [savingsAccount.id],
+      );
+    } catch (e) {
+      // If update fails, try without usd_rate
+      final map = savingsAccount.toMap();
+      map.remove('usd_rate');
+      return await db.update(
+        SavingsAccountsFields.tableName,
+        map,
+        where: '${SavingsAccountsFields.id} = ?',
+        whereArgs: [savingsAccount.id],
+      );
+    }
   }
 
   Future<int> deleteSavingsAccount(int id) async {

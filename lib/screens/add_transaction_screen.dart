@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction.dart';
+import '../services/database_service.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final String type; // 'income', 'expense', or 'saving'
@@ -201,18 +202,38 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
   }
 
-  void _saveTransaction() {
+  void _saveTransaction() async {
     if (_formKey.currentState!.validate()) {
-      final transaction = Transaction(
-        id: widget.existingTransaction?.id,
-        type: widget.type,
-        date: _selectedDate,
-        name: _selectedSource!,
-        amount: double.parse(_amountController.text),
-        source: null, // No longer needed since we use name for the category/source
-      );
+      try {
+        final rates = await DatabaseService().getExchangeRates();
+        final usdRate = rates['usd'] ?? 42.0;
+        final transaction = Transaction(
+          id: widget.existingTransaction?.id,
+          type: widget.type,
+          date: _selectedDate,
+          name: _selectedSource!,
+          amount: double.parse(_amountController.text),
+          source: null,
+          currency: _selectedCurrency,
+          usdRate: usdRate,
+        );
 
-      Navigator.pop(context, transaction);
+        Navigator.pop(context, transaction);
+      } catch (e) {
+        // fallback to default rate
+        final transaction = Transaction(
+          id: widget.existingTransaction?.id,
+          type: widget.type,
+          date: _selectedDate,
+          name: _selectedSource!,
+          amount: double.parse(_amountController.text),
+          source: null,
+          currency: _selectedCurrency,
+          usdRate: 42.0,
+        );
+
+        Navigator.pop(context, transaction);
+      }
     }
   }
 
