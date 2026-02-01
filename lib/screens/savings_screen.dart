@@ -6,7 +6,8 @@ import 'add_edit_savings_account_screen.dart';
 import 'settings_screen.dart';
 
 class SavingsScreen extends StatefulWidget {
-  const SavingsScreen({super.key});
+  final ValueNotifier<int>? navIndexNotifier;
+  const SavingsScreen({super.key, this.navIndexNotifier});
 
   @override
   State<SavingsScreen> createState() => _SavingsScreenState();
@@ -16,19 +17,37 @@ class _SavingsScreenState extends State<SavingsScreen> {
   final DatabaseService _dbService = DatabaseService();
   List<SavingsAccount> _savingsAccounts = [];
   bool _isLoading = true;
+  double _settingsUsdRate = 42.0;
+  double _settingsEurRate = 51.0;
 
   @override
   void initState() {
     super.initState();
     _loadSavingsAccounts();
+    widget.navIndexNotifier?.addListener(_onNavIndexChanged);
+  }
+
+  void _onNavIndexChanged() {
+    if (widget.navIndexNotifier?.value == 2) {
+      _loadSavingsAccounts();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.navIndexNotifier?.removeListener(_onNavIndexChanged);
+    super.dispose();
   }
 
   Future<void> _loadSavingsAccounts() async {
     setState(() => _isLoading = true);
     try {
       final savingsAccounts = await _dbService.getSavingsAccounts();
+      final rates = await _dbService.getExchangeRates();
       setState(() {
         _savingsAccounts = savingsAccounts;
+        _settingsUsdRate = rates['usd'] ?? _settingsUsdRate;
+        _settingsEurRate = rates['eur'] ?? _settingsEurRate;
         _isLoading = false;
       });
     } catch (e) {
@@ -111,7 +130,26 @@ class _SavingsScreenState extends State<SavingsScreen> {
   }
 
   double get _totalSavings {
-    return _savingsAccounts.fold(0, (sum, account) => sum + account.amount);
+    // Calculate total in USD
+    return _savingsAccounts.fold(0.0, (sum, account) {
+      double usdAmount = 0.0;
+      if (account.currency == 'USD') {
+        usdAmount = account.amount;
+      } else if (account.currency == 'UAH') {
+        // Convert UAH -> USD using the account's stored USD rate (USD->UAH)
+        final rate = account.usdRate > 0 ? account.usdRate : _settingsUsdRate;
+        usdAmount = rate > 0 ? (account.amount / rate) : 0.0;
+      } else if (account.currency == 'EUR') {
+        // Convert EUR -> UAH using settings eur rate, then UAH -> USD using settings usd rate
+        final eurRate = _settingsEurRate > 0 ? _settingsEurRate : 1.0;
+        final usdRate = _settingsUsdRate > 0 ? _settingsUsdRate : 1.0;
+        usdAmount = (account.amount * eurRate) / usdRate;
+      } else {
+        // Fallback: treat as USD
+        usdAmount = account.amount;
+      }
+      return sum + usdAmount;
+    });
   }
 
   @override
@@ -140,7 +178,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Colors.black,
               ),
             ),
           ),
@@ -196,20 +234,6 @@ class _SavingsScreenState extends State<SavingsScreen> {
   }
 
   String _formatTotalSavings() {
-    String symbol = '₴';
-    if (_savingsAccounts.isNotEmpty) {
-      switch (_savingsAccounts.first.currency) {
-        case 'USD':
-          symbol = r'$';
-          break;
-        case 'EUR':
-          symbol = '€';
-          break;
-        case 'UAH':
-        default:
-          symbol = '₴';
-      }
-    }
-    return '$symbol${_totalSavings.toStringAsFixed(2)}';
+    return r'$' + _totalSavings.toStringAsFixed(2);
   }
 }

@@ -24,18 +24,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   String? _selectedSource;
   String _selectedCurrency = 'UAH';
 
-  final List<String> _incomeSources = [
-    'Renesas',
-    'Company2',
-    'Other',
-  ];
-
-  final List<String> _expenseCategories = [
-    'Tithes',
-    'Donations',
-    'Bills',
-    'Other'
-  ];
+  List<String> _incomeSources = [];
+  List<String> _expenseCategories = [];
 
   final List<String> _savingCategories = [
     'Emergency Fund',
@@ -48,9 +38,45 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void initState() {
     super.initState();
     if (widget.existingTransaction != null) {
-      _selectedSource = widget.existingTransaction!.name;
+      _selectedSource = widget.existingTransaction!.source ?? widget.existingTransaction!.name;
       _amountController.text = widget.existingTransaction!.amount.toString();
       _selectedDate = widget.existingTransaction!.date;
+      _selectedCurrency = widget.existingTransaction!.currency;
+    }
+    _loadIncomeSources();
+    _loadExpenseCategories();
+  }
+
+  Future<void> _loadExpenseCategories() async {
+    try {
+      final rows = await DatabaseService().getSources('expense');
+      final names = rows.map((r) => (r['name'] as Object).toString()).toList();
+      setState(() {
+        _expenseCategories = names.isNotEmpty ? names.cast<String>() : ['Tithes', 'Donations', 'Bills', 'Other'];
+        _selectedSource ??= (_expenseCategories.isNotEmpty ? _expenseCategories.first : null);
+      });
+    } catch (e) {
+      setState(() {
+        _expenseCategories = ['Tithes', 'Donations', 'Bills', 'Other'];
+        _selectedSource ??= _expenseCategories.first;
+      });
+    }
+  }
+
+  Future<void> _loadIncomeSources() async {
+    try {
+      final rows = await DatabaseService().getSources('income');
+      final names = rows.map((r) => (r['name'] as Object).toString()).toList();
+      setState(() {
+        _incomeSources = names.isNotEmpty ? names.cast<String>() : ['Salary', 'Company2', 'Other'];
+        // If no selected source set, pick first
+        _selectedSource ??= (_incomeSources.isNotEmpty ? _incomeSources.first : null);
+      });
+    } catch (e) {
+      setState(() {
+        _incomeSources = ['Salary', 'Company2', 'Other'];
+        _selectedSource ??= _incomeSources.first;
+      });
     }
   }
 
@@ -213,7 +239,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           date: _selectedDate,
           name: _selectedSource!,
           amount: double.parse(_amountController.text),
-          source: null,
+          source: _selectedSource,
           currency: _selectedCurrency,
           usdRate: usdRate,
         );
@@ -227,7 +253,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           date: _selectedDate,
           name: _selectedSource!,
           amount: double.parse(_amountController.text),
-          source: null,
+          source: _selectedSource,
           currency: _selectedCurrency,
           usdRate: 42.0,
         );

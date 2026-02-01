@@ -6,7 +6,8 @@ import 'add_transaction_screen.dart';
 import 'settings_screen.dart';
 
 class ExpensesScreen extends StatefulWidget {
-  const ExpensesScreen({super.key});
+  final ValueNotifier<int>? navIndexNotifier;
+  const ExpensesScreen({super.key, this.navIndexNotifier});
 
   @override
   State<ExpensesScreen> createState() => _ExpensesScreenState();
@@ -21,6 +22,19 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   void initState() {
     super.initState();
     _loadTransactions();
+    widget.navIndexNotifier?.addListener(_onNavIndexChanged);
+  }
+
+  void _onNavIndexChanged() {
+    if (widget.navIndexNotifier?.value == 1) {
+      _loadTransactions();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.navIndexNotifier?.removeListener(_onNavIndexChanged);
+    super.dispose();
   }
 
   Future<void> _loadTransactions() async {

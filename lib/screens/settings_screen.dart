@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/database_service.dart';
+import 'edit_sources_screen.dart';
+import 'edit_categories_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -182,6 +184,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                     );
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: const Text('Edit Sources'),
+                  subtitle: const Text('Manage income sources and categories'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const EditSourcesScreen()));
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.category),
+                  title: const Text('Edit Categories'),
+                  subtitle: const Text('Manage expense categories'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const EditCategoriesScreen()));
                   },
                 ),
               ],

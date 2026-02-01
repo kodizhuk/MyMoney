@@ -32,16 +32,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  final ValueNotifier<int> _selectedIndexNotifier = ValueNotifier<int>(0);
 
-  static const List<Widget> _screens = <Widget>[
-    IncomeScreen(),
-    ExpensesScreen(),
-    SavingsScreen(),
-  ];
+  List<Widget> get _screens => <Widget>[
+        IncomeScreen(navIndexNotifier: _selectedIndexNotifier),
+        ExpensesScreen(navIndexNotifier: _selectedIndexNotifier),
+        SavingsScreen(navIndexNotifier: _selectedIndexNotifier),
+      ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _selectedIndexNotifier.value = index;
     });
   }
 

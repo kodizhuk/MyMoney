@@ -6,7 +6,8 @@ import 'add_transaction_screen.dart';
 import 'settings_screen.dart';
 
 class IncomeScreen extends StatefulWidget {
-  const IncomeScreen({super.key});
+  final ValueNotifier<int>? navIndexNotifier;
+  const IncomeScreen({super.key, this.navIndexNotifier});
 
   @override
   State<IncomeScreen> createState() => _IncomeScreenState();
@@ -15,20 +16,41 @@ class IncomeScreen extends StatefulWidget {
 class _IncomeScreenState extends State<IncomeScreen> {
   final DatabaseService _dbService = DatabaseService();
   List<Transaction> _incomeTransactions = [];
+  List<Transaction> _expenseTransactions = [];
   bool _isLoading = true;
+  double _settingsUsdRate = 42.0;
+  double _settingsEurRate = 51.0;
 
   @override
   void initState() {
     super.initState();
     _loadTransactions();
+    widget.navIndexNotifier?.addListener(_onNavIndexChanged);
+  }
+
+  void _onNavIndexChanged() {
+    if (widget.navIndexNotifier?.value == 0) {
+      _loadTransactions();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.navIndexNotifier?.removeListener(_onNavIndexChanged);
+    super.dispose();
   }
 
   Future<void> _loadTransactions() async {
     setState(() => _isLoading = true);
     try {
       final transactions = await _dbService.getTransactions('income');
+      final expenses = await _dbService.getTransactions('expense');
+      final rates = await _dbService.getExchangeRates();
       setState(() {
         _incomeTransactions = transactions;
+        _expenseTransactions = expenses;
+        _settingsUsdRate = rates['usd'] ?? _settingsUsdRate;
+        _settingsEurRate = rates['eur'] ?? _settingsEurRate;
         _isLoading = false;
       });
     } catch (e) {
@@ -119,22 +141,36 @@ class _IncomeScreenState extends State<IncomeScreen> {
   }
 
   String _calculateTithe() {
-    final tithe = _totalIncome * 0.1;
-    String symbol = '₴';
-    if (_incomeTransactions.isNotEmpty) {
-      switch (_incomeTransactions.first.currency) {
-        case 'USD':
-          symbol = r'$';
-          break;
-        case 'EUR':
-          symbol = '€';
-          break;
-        case 'UAH':
-        default:
-          symbol = '₴';
+    // Convert all income to UAH
+    double totalIncomeUAH = _incomeTransactions.fold(0.0, (sum, tx) {
+      double amt = tx.amount;
+      if (tx.currency == 'USD') {
+        final rate = tx.usdRate > 0 ? tx.usdRate : _settingsUsdRate;
+        amt = tx.amount * rate;
+      } else if (tx.currency == 'EUR') {
+        final eurRate = _settingsEurRate > 0 ? _settingsEurRate : 1.0;
+        amt = tx.amount * eurRate;
       }
-    }
-    return '${tithe.toStringAsFixed(2)} $symbol';
+      return sum + amt;
+    });
+
+    // Sum expenses whose source/category equals 'Tithes' (case-insensitive), in UAH
+    double titheExpensesUAH = _expenseTransactions.fold(0.0, (sum, tx) {
+      if ((tx.source ?? '').toString().toLowerCase() != 'tithes') return sum;
+      double amt = tx.amount;
+      if (tx.currency == 'USD') {
+        final rate = tx.usdRate > 0 ? tx.usdRate : _settingsUsdRate;
+        amt = tx.amount * rate;
+      } else if (tx.currency == 'EUR') {
+        final eurRate = _settingsEurRate > 0 ? _settingsEurRate : 1.0;
+        amt = tx.amount * eurRate;
+      }
+      return sum + amt;
+    });
+
+    final titheUAH = totalIncomeUAH * 0.1;
+    final resultUAH = titheUAH - titheExpensesUAH;
+    return '₴${resultUAH.toStringAsFixed(2)}';
   }
 
   @override

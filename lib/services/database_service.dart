@@ -36,6 +36,13 @@ class SettingsFields {
   static const String eurRate = 'eur_rate';
 }
 
+class SourcesFields {
+  static const String tableName = 'sources';
+  static const String id = 'id';
+  static const String type = 'type';
+  static const String name = 'name';
+}
+
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
   static Database? _database;
@@ -98,6 +105,13 @@ class DatabaseService {
         eur_rate REAL NOT NULL DEFAULT 51
       )
     ''');
+    await db.execute('''
+      CREATE TABLE sources (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL,
+        name TEXT NOT NULL
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -127,6 +141,14 @@ class DatabaseService {
         CREATE TABLE settings (
           usd_rate REAL NOT NULL DEFAULT 42,
           eur_rate REAL NOT NULL DEFAULT 51
+        )
+      ''');
+      // Create sources table as well
+      await db.execute('''
+        CREATE TABLE sources (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          type TEXT NOT NULL,
+          name TEXT NOT NULL
         )
       ''');
     }
@@ -285,5 +307,52 @@ class DatabaseService {
       'SELECT SUM(${SavingsAccountsFields.amount}) as total FROM ${SavingsAccountsFields.tableName}',
     );
     return result.first['total'] ?? 0.0;
+  }
+
+  // Sources CRUD
+  Future<List<Map<String, dynamic>>> getSources(String type) async {
+    Database db = await database;
+    try {
+      final rows = await db.query(SourcesFields.tableName,
+          where: '${SourcesFields.type} = ?', whereArgs: [type], orderBy: '${SourcesFields.name} ASC');
+      return rows;
+    } catch (e) {
+      // Table might not exist; attempt to create and return empty
+      try {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS sources (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type TEXT NOT NULL,
+            name TEXT NOT NULL
+          )
+        ''');
+      } catch (_) {}
+      return [];
+    }
+  }
+
+  Future<int> insertSource(String type, String name) async {
+    Database db = await database;
+    try {
+      return await db.insert(SourcesFields.tableName, {SourcesFields.type: type, SourcesFields.name: name});
+    } catch (e) {
+      try {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS sources (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type TEXT NOT NULL,
+            name TEXT NOT NULL
+          )
+        ''');
+        return await db.insert(SourcesFields.tableName, {SourcesFields.type: type, SourcesFields.name: name});
+      } catch (e2) {
+        rethrow;
+      }
+    }
+  }
+
+  Future<int> deleteSource(int id) async {
+    Database db = await database;
+    return await db.delete(SourcesFields.tableName, where: '${SourcesFields.id} = ?', whereArgs: [id]);
   }
 }
