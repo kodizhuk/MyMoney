@@ -147,7 +147,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   SizedBox(
                     width: 120,
                     child: DropdownButtonFormField<String>(
-                      value: _selectedCurrency,
+                      initialValue: _selectedCurrency,
                       decoration: const InputDecoration(
                         labelText: 'Currency',
                       ),

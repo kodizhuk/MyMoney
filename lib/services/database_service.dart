@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'dart:io' as io;
 
 class TransactionsFields {
   static const String tableName = 'transactions';
@@ -307,6 +308,70 @@ class DatabaseService {
       'SELECT SUM(${SavingsAccountsFields.amount}) as total FROM ${SavingsAccountsFields.tableName}',
     );
     return result.first['total'] ?? 0.0;
+  }
+
+  /// Exports the database file to the user's Downloads folder and returns the new path.
+  Future<String> exportDatabase() async {
+    final dbPath = join(await getDatabasesPath(), 'money_tracker.db');
+    final src = io.File(dbPath);
+    if (!await src.exists()) {
+      throw Exception('Database file not found at $dbPath');
+    }
+
+    // Determine user's home/downloads directory
+    String home = io.Platform.isWindows
+        ? (io.Platform.environment['USERPROFILE'] ?? '.')
+        : (io.Platform.environment['HOME'] ?? '.');
+    final downloadsDir = join(home, 'Downloads');
+    try {
+      await io.Directory(downloadsDir).create(recursive: true);
+    } catch (_) {}
+
+    final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
+    final destPath = join(downloadsDir, 'money_tracker_$timestamp.db');
+
+    await src.copy(destPath);
+    return destPath;
+  }
+
+  /// Close the open database connection if any.
+  Future<void> closeDatabase() async {
+    if (_database != null) {
+      try {
+        await _database!.close();
+      } catch (_) {}
+      _database = null;
+    }
+  }
+
+  /// Import a database file from [sourcePath], replacing the current database.
+  /// Returns the destination path where the DB was written.
+  Future<String> importDatabase(String sourcePath) async {
+    final srcFile = io.File(sourcePath);
+    if (!await srcFile.exists()) throw Exception('Source file not found: $sourcePath');
+
+    // Close existing DB connection so file can be replaced
+    await closeDatabase();
+
+    final dbPath = join(await getDatabasesPath(), 'money_tracker.db');
+    final destFile = io.File(dbPath);
+
+    // Ensure parent directory exists
+    final parent = destFile.parent;
+    try {
+      await parent.create(recursive: true);
+    } catch (_) {}
+
+    // Replace destination
+    if (await destFile.exists()) {
+      try {
+        await destFile.delete();
+      } catch (_) {}
+    }
+
+    await srcFile.copy(dbPath);
+
+    return dbPath;
   }
 
   // Sources CRUD

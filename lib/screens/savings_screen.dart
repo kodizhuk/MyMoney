@@ -4,6 +4,7 @@ import '../services/database_service.dart';
 import '../widgets/savings_account_widget.dart';
 import 'add_edit_savings_account_screen.dart';
 import 'settings_screen.dart';
+import 'statistics_screen.dart';
 
 class SavingsScreen extends StatefulWidget {
   final ValueNotifier<int>? navIndexNotifier;
@@ -158,6 +159,15 @@ class _SavingsScreenState extends State<SavingsScreen> {
       appBar: AppBar(
         title: const Text('Savings'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.show_chart),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {

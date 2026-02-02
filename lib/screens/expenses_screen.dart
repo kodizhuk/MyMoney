@@ -4,6 +4,7 @@ import '../services/database_service.dart';
 import '../widgets/transaction_item.dart';
 import 'add_transaction_screen.dart';
 import 'settings_screen.dart';
+import 'statistics_screen.dart';
 
 class ExpensesScreen extends StatefulWidget {
   final ValueNotifier<int>? navIndexNotifier;
@@ -138,6 +139,15 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       appBar: AppBar(
         title: const Text('Expenses'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.show_chart),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
