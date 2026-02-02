@@ -1,6 +1,6 @@
-# my_money
+# MyMoney
 
-A new Flutter project.
+
 
 ## Getting Started
 
@@ -17,25 +17,29 @@ samples, guidance on mobile development, and a full API reference.
 
 
 ## Folder Structure
-models/ - Data models and classes
-|---transaction.dart - Transaction model (income/expense)
-|---category.dart - Category model for transaction types
+- models/ - Data models and classes
+    - transaction.dart - Transaction model (income/expense)
+    - category.dart - Category model for transaction types
+- screens/ - UI screens/pages
+    - home_screen.dart - Main dashboard showing balance and recent transactions
+    - add_transaction_screen.dart - Screen to add new income/expense
+    - transaction_list_screen.dart - List of all transactions with filters
+    - statistics_screen.dart - Charts and analytics
+- widgets/ - Reusable UI components
+    - transaction_item.dart - Individual transaction list item
+    - balance_card.dart - Balance display widget
+    - category_selector.dart - Dropdown/selector for categories
+- services/ - Business logic and data handling
+    - database_service.dart - SQLite database operations
+    - transaction_service.dart - Transaction CRUD operations
+- utils/ - Helper functions and constants
+    - constants.dart - App constants (colors, categories, etc.)
+    - date_formatter.dart - Date formatting utilities
 
-screens/ - UI screens/pages
-|---home_screen.dart - Main dashboard showing balance and recent transactions
-|---add_transaction_screen.dart - Screen to add new income/expense
-|---transaction_list_screen.dart - List of all transactions with filters
-|---statistics_screen.dart - Charts and analytics
+## Screenshots
 
-widgets/ - Reusable UI components
-|---transaction_item.dart - Individual transaction list item
-|---balance_card.dart - Balance display widget
-|---category_selector.dart - Dropdown/selector for categories
-
-services/ - Business logic and data handling
-|---database_service.dart - SQLite database operations
-|---transaction_service.dart - Transaction CRUD operations
-
-utils/ - Helper functions and constants
-|---constants.dart - App constants (colors, categories, etc.)
-|---date_formatter.dart - Date formatting utilities
+## Features
+1. Icome Screen - you can add income and choose income source. 
+2. Expences Screen - to add Donatinon, Tithe or another from category
+3. Savings - to have all your savings in one place
+4. Statistics - show the icome by month or years. Alsi could be filtered by income source
