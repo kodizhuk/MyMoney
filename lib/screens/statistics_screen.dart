@@ -185,7 +185,7 @@ Widget build(BuildContext context) {
                                     if (_range == TimeRange.month) {
                                       display = DateFormat('dd').format(DateTime.parse(label));
                                     } else if (_range == TimeRange.year) {
-                                      display = DateFormat('MMM yyyy').format(DateTime.parse(label + '-01'));
+                                      display = DateFormat('MMM yyyy').format(DateTime.parse('$label-01'));
                                     } else {
                                       display = label;
                                     }

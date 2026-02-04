@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/database_service.dart';
-import 'package:file_picker/file_picker.dart';
+// import 'package:file_picker/file_picker.dart';
 import 'edit_sources_screen.dart';
 import 'edit_categories_screen.dart';
 
@@ -169,18 +169,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.info),
                   title: const Text('About'),
-                  subtitle: const Text('Money Tracker v1.0.0'),
+                  subtitle: const Text('Money Tracker v0.0.1'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     showAboutDialog(
                       context: context,
                       applicationName: 'Money Tracker',
-                      applicationVersion: '1.0.0',
+                      applicationVersion: '0.0.1',
                       applicationLegalese: '© 2026 Money Tracker App',
                       children: [
                         const SizedBox(height: 16),
                         const Text(
-                          'A comprehensive money tracking application for managing income, expenses, and savings.',
+                          'A comprehensive money tracking application for managing income, expenses, and savings by kodizhuk',
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -188,41 +188,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
                 const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.download),
-                  title: const Text('Export database'),
-                  subtitle: const Text('Save a copy of the app database to Downloads'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () async {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Exporting database...')));
-                    try {
-                      final path = await DatabaseService().exportDatabase();
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Database exported to $path')));
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error exporting database: $e')));
-                    }
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.upload_file),
-                  title: const Text('Import database'),
-                  subtitle: const Text('Replace current database with a saved DB file'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () async {
-                    try {
-                      final result = await FilePicker.platform.pickFiles(allowMultiple: false, type: FileType.custom, allowedExtensions: ['db', 'sqlite']);
-                      if (result == null || result.files.isEmpty) return;
-                      final path = result.files.single.path;
-                      if (path == null) return;
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing database...')));
-                      final dest = await DatabaseService().importDatabase(path);
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Database imported to $dest')));
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error importing database: $e')));
-                    }
-                  },
-                ),
+                // ListTile(
+                //   leading: const Icon(Icons.download),
+                //   title: const Text('Export database'),
+                //   subtitle: const Text('Save a copy of the app database to Downloads'),
+                //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                //   onTap: () async {
+                //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Exporting database...')));
+                //     try {
+                //       final path = await DatabaseService().exportDatabase();
+                //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Database exported to $path')));
+                //     } catch (e) {
+                //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error exporting database: $e')));
+                //     }
+                //   },
+                // ),
+                // const Divider(),
+                // ListTile(
+                //   leading: const Icon(Icons.upload_file),
+                //   title: const Text('Import database'),
+                //   subtitle: const Text('Replace current database with a saved DB file'),
+                //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                //   onTap: () async {
+                //     try {
+                //       final result = await FilePicker.platform.pickFiles(allowMultiple: false, type: FileType.custom, allowedExtensions: ['db', 'sqlite']);
+                //       if (result == null || result.files.isEmpty) return;
+                //       final path = result.files.single.path;
+                //       if (path == null) return;
+                //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing database...')));
+                //       final dest = await DatabaseService().importDatabase(path);
+                //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Database imported to $dest')));
+                //     } catch (e) {
+                //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error importing database: $e')));
+                //     }
+                //   },
+                // ),
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.edit),

@@ -41,5 +41,7 @@ utils/ - Helper functions and constants
 |---date_formatter.dart - Date formatting utilities
 
 ## how to run on after copy the files (CMake error)
-- fluyter clean
+- flutter clean
 - flutter build windows
+- flutter build apk
+the apk will be located here  build\app\outputs\flutter-apk\app-release.apk

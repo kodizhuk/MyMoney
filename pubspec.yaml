@@ -40,7 +40,6 @@ dependencies:
   sqflite_common_ffi: ^2.3.3
   path: ^1.9.1
   path_provider: ^2.1.2
-  file_picker: ^5.3.2
   fl_chart: ^0.65.0
 
   # Date formatting
@@ -52,7 +51,7 @@ dev_dependencies:
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
+  # activated in the `analysis_options.yaml` file located at the rPoot of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
