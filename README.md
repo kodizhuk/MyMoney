@@ -43,5 +43,5 @@ utils/ - Helper functions and constants
 ## how to run on after copy the files (CMake error)
 - flutter clean
 - flutter build windows
-- flutter build apk
+- flutter build apk:
 the apk will be located here  build\app\outputs\flutter-apk\app-release.apk

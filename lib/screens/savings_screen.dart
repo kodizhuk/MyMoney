@@ -18,6 +18,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
   final DatabaseService _dbService = DatabaseService();
   List<SavingsAccount> _savingsAccounts = [];
   bool _isLoading = true;
+  String _selectedCurrency = 'USD';
   double _settingsUsdRate = 42.0;
   double _settingsEurRate = 51.0;
 
@@ -153,6 +154,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -194,52 +196,87 @@ class _SavingsScreenState extends State<SavingsScreen> {
           ),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _savingsAccounts.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+      //Buttons
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    Icons.account_balance_wallet,
-                    size: 80,
-                    color: Colors.grey[400],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('UAH'),
+                        selected: _selectedCurrency == 'UAH',
+                        onSelected: (_) => setState(() => _selectedCurrency = 'UAH'),                      ),
+                      const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: const Text('USD'),
+                        selected: _selectedCurrency == 'USD',
+                        onSelected: (_) => setState(() => _selectedCurrency = 'USD'),
+                      ),
+                      const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: const Text('EUR'),
+                        selected: _selectedCurrency == 'EUR',
+                        onSelected: (_) => setState(() => _selectedCurrency = 'EUR'),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No savings accounts yet',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tap + to add your first savings account',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[500],
-                    ),
-                  ),
+                  const SizedBox(height: 12),
                 ],
               ),
-            )
-          : ListView.builder(
-              itemCount: _savingsAccounts.length,
-              itemBuilder: (context, index) {
-                final account = _savingsAccounts[index];
-                return SavingsAccountWidget(
-                  account: account,
-                  onEdit: () => _editSavingsAccount(account),
-                  onDelete: () => _deleteSavingsAccount(account),
-                );
-              },
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addSavingsAccount,
-        child: const Icon(Icons.add),
-      ),
+      ), 
+      //List
+      // body: _isLoading
+      //     ? const Center(child: CircularProgressIndicator())
+      //     : _savingsAccounts.isEmpty
+      //     ? Center(
+      //         child: Column(
+      //           mainAxisAlignment: MainAxisAlignment.center,
+      //           children: [
+      //             Icon(
+      //               Icons.account_balance_wallet,
+      //               size: 80,
+      //               color: Colors.grey[400],
+      //             ),
+      //             const SizedBox(height: 16),
+      //             Text(
+      //               'No savings accounts yet',
+      //               style: TextStyle(
+      //                 fontSize: 18,
+      //                 color: Colors.grey[600],
+      //               ),
+      //             ),
+      //             const SizedBox(height: 8),
+      //             Text(
+      //               'Tap + to add your first savings account',
+      //               style: TextStyle(
+      //                 fontSize: 14,
+      //                 color: Colors.grey[500],
+      //               ),
+      //             ),
+      //           ],
+      //         ),
+      //       )
+      //     : ListView.builder(
+      //         itemCount: _savingsAccounts.length,
+      //         itemBuilder: (context, index) {
+      //           final account = _savingsAccounts[index];
+      //           return SavingsAccountWidget(
+      //             account: account,
+      //             onEdit: () => _editSavingsAccount(account),
+      //             onDelete: () => _deleteSavingsAccount(account),
+      //           );
+      //         },
+      //       ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _addSavingsAccount,
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 

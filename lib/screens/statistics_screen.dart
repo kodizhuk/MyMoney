@@ -127,6 +127,7 @@ Widget build(BuildContext context) {
         ),
       ],
     ),
+    //Buttons
     body: Padding(
       padding: const EdgeInsets.all(16.0),
       child: _isLoading
@@ -213,6 +214,6 @@ Widget build(BuildContext context) {
               ],
             ),
     ), // Added closing parenthesis for Padding
-  ); // Added closing parenthesis for Scaffold
+  );
 } // Added closing brace for build method
 }
