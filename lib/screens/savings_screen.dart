@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_money/l10n/app_localizations.dart';
 import '../models/savings_account.dart';
 import '../services/database_service.dart';
 import 'add_edit_savings_account_screen.dart';
@@ -194,7 +195,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ChoiceChip(
-                        label: const Text('UAH'),
+                        label: Text(AppLocalizations.of(context)!.uah),
                         selected: _selectedCurrency == 'UAH',
                         onSelected: (_) => setState(() => _selectedCurrency = 'UAH'),                      ),
                       const SizedBox(width: 8),
