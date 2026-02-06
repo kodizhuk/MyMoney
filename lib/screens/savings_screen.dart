@@ -156,96 +156,6 @@ class _SavingsScreenState extends State<SavingsScreen> {
     });
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: const Text('Savings'),
-  //       actions: [
-  //         IconButton(
-  //           icon: const Icon(Icons.show_chart),
-  //           onPressed: () {
-  //             Navigator.push(
-  //               context,
-  //               MaterialPageRoute(builder: (context) => const StatisticsScreen()),
-  //             );
-  //           },
-  //         ),
-  //         IconButton(
-  //           icon: const Icon(Icons.settings),
-  //           onPressed: () {
-  //             Navigator.push(
-  //               context,
-  //               MaterialPageRoute(builder: (context) => const SettingsScreen()),
-  //             );
-  //           },
-  //         ),
-  //       ],
-  //       bottom: PreferredSize(
-  //         preferredSize: const Size.fromHeight(50),
-  //         child: Container(
-  //           padding: const EdgeInsets.all(16),
-  //           alignment: Alignment.centerLeft,
-  //           child: Text(
-  //             'Total Savings: ${_formatTotalSavings()}',
-  //             style: const TextStyle(
-  //               fontSize: 18,
-  //               fontWeight: FontWeight.bold,
-  //               color: Colors.black,
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //     body: _isLoading
-  //         ? const Center(child: CircularProgressIndicator())
-  //         : _savingsAccounts.isEmpty
-  //         ? Center(
-  //             child: Column(
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               children: [
-  //                 Icon(
-  //                   Icons.account_balance_wallet,
-  //                   size: 80,
-  //                   color: Colors.grey[400],
-  //                 ),
-  //                 const SizedBox(height: 16),
-  //                 Text(
-  //                   'No savings accounts yet',
-  //                   style: TextStyle(
-  //                     fontSize: 18,
-  //                     color: Colors.grey[600],
-  //                   ),
-  //                 ),
-  //                 const SizedBox(height: 8),
-  //                 Text(
-  //                   'Tap + to add your first savings account',
-  //                   style: TextStyle(
-  //                     fontSize: 14,
-  //                     color: Colors.grey[500],
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           )
-  //         : ListView.builder(
-  //             itemCount: _savingsAccounts.length,
-  //             itemBuilder: (context, index) {
-  //               final account = _savingsAccounts[index];
-  //               return SavingsAccountWidget(
-  //                 account: account,
-  //                 onEdit: () => _editSavingsAccount(account),
-  //                 onDelete: () => _deleteSavingsAccount(account),
-  //               );
-  //             },
-  //           ),
-  //     floatingActionButton: FloatingActionButton(
-  //       onPressed: _addSavingsAccount,
-  //       child: const Icon(Icons.add),
-  //     ),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -271,21 +181,6 @@ class _SavingsScreenState extends State<SavingsScreen> {
             },
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Total Savings: ${_formatTotalSavings()}',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ),
       ),
       // Buttons
       body: Padding(
@@ -322,8 +217,18 @@ class _SavingsScreenState extends State<SavingsScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  // List
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Total Savings: ${_formatTotalSavings()}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
                   SizedBox(
                     height: 300,
                     child: _savingsAccounts.isEmpty
@@ -367,7 +272,6 @@ class _SavingsScreenState extends State<SavingsScreen> {
                           },
                         ),
                     ),
-                  
                   ],
               ),
       ), 
