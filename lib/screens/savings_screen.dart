@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/savings_account.dart';
 import '../services/database_service.dart';
-import '../widgets/savings_account_widget.dart';
 import 'add_edit_savings_account_screen.dart';
+import '../widgets/savings_account_widget.dart';
 import 'settings_screen.dart';
 import 'statistics_screen.dart';
+
 
 class SavingsScreen extends StatefulWidget {
   final ValueNotifier<int>? navIndexNotifier;
@@ -13,6 +14,7 @@ class SavingsScreen extends StatefulWidget {
   @override
   State<SavingsScreen> createState() => _SavingsScreenState();
 }
+
 
 class _SavingsScreenState extends State<SavingsScreen> {
   final DatabaseService _dbService = DatabaseService();
@@ -154,6 +156,95 @@ class _SavingsScreenState extends State<SavingsScreen> {
     });
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     appBar: AppBar(
+  //       title: const Text('Savings'),
+  //       actions: [
+  //         IconButton(
+  //           icon: const Icon(Icons.show_chart),
+  //           onPressed: () {
+  //             Navigator.push(
+  //               context,
+  //               MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+  //             );
+  //           },
+  //         ),
+  //         IconButton(
+  //           icon: const Icon(Icons.settings),
+  //           onPressed: () {
+  //             Navigator.push(
+  //               context,
+  //               MaterialPageRoute(builder: (context) => const SettingsScreen()),
+  //             );
+  //           },
+  //         ),
+  //       ],
+  //       bottom: PreferredSize(
+  //         preferredSize: const Size.fromHeight(50),
+  //         child: Container(
+  //           padding: const EdgeInsets.all(16),
+  //           alignment: Alignment.centerLeft,
+  //           child: Text(
+  //             'Total Savings: ${_formatTotalSavings()}',
+  //             style: const TextStyle(
+  //               fontSize: 18,
+  //               fontWeight: FontWeight.bold,
+  //               color: Colors.black,
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //     body: _isLoading
+  //         ? const Center(child: CircularProgressIndicator())
+  //         : _savingsAccounts.isEmpty
+  //         ? Center(
+  //             child: Column(
+  //               mainAxisAlignment: MainAxisAlignment.center,
+  //               children: [
+  //                 Icon(
+  //                   Icons.account_balance_wallet,
+  //                   size: 80,
+  //                   color: Colors.grey[400],
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //                 Text(
+  //                   'No savings accounts yet',
+  //                   style: TextStyle(
+  //                     fontSize: 18,
+  //                     color: Colors.grey[600],
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 8),
+  //                 Text(
+  //                   'Tap + to add your first savings account',
+  //                   style: TextStyle(
+  //                     fontSize: 14,
+  //                     color: Colors.grey[500],
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           )
+  //         : ListView.builder(
+  //             itemCount: _savingsAccounts.length,
+  //             itemBuilder: (context, index) {
+  //               final account = _savingsAccounts[index];
+  //               return SavingsAccountWidget(
+  //                 account: account,
+  //                 onEdit: () => _editSavingsAccount(account),
+  //                 onDelete: () => _deleteSavingsAccount(account),
+  //               );
+  //             },
+  //           ),
+  //     floatingActionButton: FloatingActionButton(
+  //       onPressed: _addSavingsAccount,
+  //       child: const Icon(Icons.add),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +287,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
           ),
         ),
       ),
-      //Buttons
+      // Buttons
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _isLoading
@@ -224,59 +315,66 @@ class _SavingsScreenState extends State<SavingsScreen> {
                         onSelected: (_) => setState(() => _selectedCurrency = 'EUR'),
                       ),
                       const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: const Text('All'),
+                        selected: _selectedCurrency == 'All',
+                        onSelected: (_) => setState(() => _selectedCurrency = 'All'),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                ],
+                  // List
+                  SizedBox(
+                    height: 300,
+                    child: _savingsAccounts.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.account_balance_wallet,
+                                size: 80,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No savings accounts yet',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Tap + to add your first savings account',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: _savingsAccounts.length,
+                          itemBuilder: (context, index) {
+                            final account = _savingsAccounts[index];
+                            return SavingsAccountWidget(  // ← Define this widget class
+                              account: account,
+                              onEdit: () => _editSavingsAccount(account),
+                              onDelete: () => _deleteSavingsAccount(account),
+                            );
+                          },
+                        ),
+                    ),
+                  
+                  ],
               ),
       ), 
-      //List
-      // body: _isLoading
-      //     ? const Center(child: CircularProgressIndicator())
-      //     : _savingsAccounts.isEmpty
-      //     ? Center(
-      //         child: Column(
-      //           mainAxisAlignment: MainAxisAlignment.center,
-      //           children: [
-      //             Icon(
-      //               Icons.account_balance_wallet,
-      //               size: 80,
-      //               color: Colors.grey[400],
-      //             ),
-      //             const SizedBox(height: 16),
-      //             Text(
-      //               'No savings accounts yet',
-      //               style: TextStyle(
-      //                 fontSize: 18,
-      //                 color: Colors.grey[600],
-      //               ),
-      //             ),
-      //             const SizedBox(height: 8),
-      //             Text(
-      //               'Tap + to add your first savings account',
-      //               style: TextStyle(
-      //                 fontSize: 14,
-      //                 color: Colors.grey[500],
-      //               ),
-      //             ),
-      //           ],
-      //         ),
-      //       )
-      //     : ListView.builder(
-      //         itemCount: _savingsAccounts.length,
-      //         itemBuilder: (context, index) {
-      //           final account = _savingsAccounts[index];
-      //           return SavingsAccountWidget(
-      //             account: account,
-      //             onEdit: () => _editSavingsAccount(account),
-      //             onDelete: () => _deleteSavingsAccount(account),
-      //           );
-      //         },
-      //       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _addSavingsAccount,
-      //   child: const Icon(Icons.add),
-      // ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addSavingsAccount,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
