@@ -8,5 +8,18 @@ import 'app_localizations.dart';
 class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
+  @override
+  String get usd => 'USD';
 
+  @override
+  String get uah => 'UAH!';
+
+  @override
+  String get eur => 'EUR!';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get income => 'Income';
 }

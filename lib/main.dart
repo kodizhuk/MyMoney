@@ -52,10 +52,10 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.trending_up),
-            label: 'Income',
+            label: 'Income'
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.trending_down),

@@ -4,6 +4,8 @@
   "uah": "UAH!",
   "eur": "EUR!",
   "all": "All",
-  
+  "income": "Income",
+  "@income": {
+    "description": "Bottom navigation label for income tab"
+  }
 }
-``

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:my_money/l10n/app_localizations.dart';
 import '../models/savings_account.dart';
 import '../services/database_service.dart';
 import 'add_edit_savings_account_screen.dart';
@@ -46,11 +45,24 @@ class _SavingsScreenState extends State<SavingsScreen> {
 
   Future<void> _loadSavingsAccounts() async {
     setState(() => _isLoading = true);
+    // TODO: filter by selected currnecy
     try {
       final savingsAccounts = await _dbService.getSavingsAccounts();
       final rates = await _dbService.getExchangeRates();
+      _savingsAccounts.clear();
       setState(() {
-        _savingsAccounts = savingsAccounts;
+        for(final acc in savingsAccounts){
+          if(acc.currency == 'UAH' && _selectedCurrency == 'UAH'){
+            _savingsAccounts.add(acc);
+          }else if(acc.currency == 'USD' && _selectedCurrency == 'USD'){
+            _savingsAccounts.add(acc);
+          }else if(acc.currency == 'EUR' && _selectedCurrency == 'EUR'){
+            _savingsAccounts.add(acc);
+          }else if(_selectedCurrency == 'All'){
+            _savingsAccounts.add(acc);
+          }
+        }
+
         _settingsUsdRate = rates['usd'] ?? _settingsUsdRate;
         _settingsEurRate = rates['eur'] ?? _settingsEurRate;
         _isLoading = false;
@@ -135,25 +147,51 @@ class _SavingsScreenState extends State<SavingsScreen> {
   }
 
   double get _totalSavings {
-    // Calculate total in USD
+    // Calculate total depends on the selected currency
     return _savingsAccounts.fold(0.0, (sum, account) {
-      double usdAmount = 0.0;
-      if (account.currency == 'USD') {
-        usdAmount = account.amount;
-      } else if (account.currency == 'UAH') {
-        // Convert UAH -> USD using the account's stored USD rate (USD->UAH)
-        final rate = account.usdRate > 0 ? account.usdRate : _settingsUsdRate;
-        usdAmount = rate > 0 ? (account.amount / rate) : 0.0;
-      } else if (account.currency == 'EUR') {
-        // Convert EUR -> UAH using settings eur rate, then UAH -> USD using settings usd rate
-        final eurRate = _settingsEurRate > 0 ? _settingsEurRate : 1.0;
-        final usdRate = _settingsUsdRate > 0 ? _settingsUsdRate : 1.0;
-        usdAmount = (account.amount * eurRate) / usdRate;
-      } else {
-        // Fallback: treat as USD
-        usdAmount = account.amount;
+      double amount = 0.0;
+
+      if(_selectedCurrency == 'UAH'){
+        //count all the account money of the selected currency
+        if(account.currency == 'UAH'){
+          sum += account.amount;
+          //print('curr $amount ${account.currency}');
+        }
+      }else if(_selectedCurrency == 'USD'){
+        if(account.currency == 'USD'){
+          sum += account.amount;
+          //print('curr $amount ${account.currency}');
+        }
+      }else if (_selectedCurrency == 'EUR'){
+        if(account.currency == 'EUR'){
+          sum += account.amount;
+        }
+      }else{
+        // count total
+        sum += account.amount;
+        //print('curr $amount ${account.currency}');
+        
       }
-      return sum + usdAmount;
+
+
+      // if (account.currency == 'USD') {
+      //   amount = account.amount;
+      // } else if (account.currency == 'UAH') {
+      //   // Convert UAH -> USD using the account's stored USD rate (USD->UAH)
+      //   final rate = account.usdRate > 0 ? account.usdRate : _settingsUsdRate;
+      //   amount = rate > 0 ? (account.amount / rate) : 0.0;
+      // } else if (account.currency == 'EUR') {
+      //   // Convert EUR -> UAH using settings eur rate, then UAH -> USD using settings usd rate
+      //   final eurRate = _settingsEurRate > 0 ? _settingsEurRate : 1.0;
+      //   final usdRate = _settingsUsdRate > 0 ? _settingsUsdRate : 1.0;
+      //   amount = (account.amount * eurRate) / usdRate;
+      // } else {
+      //   // Fallback: treat as USD
+      //   amount = account.amount;
+      // }
+
+
+      return sum;
     });
   }
 
@@ -195,26 +233,40 @@ class _SavingsScreenState extends State<SavingsScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ChoiceChip(
-                        label: Text(AppLocalizations.of(context)!.uah),
+                        label: Text('UAH'),
                         selected: _selectedCurrency == 'UAH',
-                        onSelected: (_) => setState(() => _selectedCurrency = 'UAH'),                      ),
+                        onSelected: (_) => setState((){
+                           _selectedCurrency = 'UAH';
+                           _loadSavingsAccounts();
+                        }),
+                        
+                      ),
                       const SizedBox(width: 8),
                       ChoiceChip(
                         label: const Text('USD'),
                         selected: _selectedCurrency == 'USD',
-                        onSelected: (_) => setState(() => _selectedCurrency = 'USD'),
+                        onSelected: (_) => setState((){
+                           _selectedCurrency = 'USD';
+                           _loadSavingsAccounts();
+                        }),
                       ),
                       const SizedBox(width: 8),
                       ChoiceChip(
                         label: const Text('EUR'),
                         selected: _selectedCurrency == 'EUR',
-                        onSelected: (_) => setState(() => _selectedCurrency = 'EUR'),
+                        onSelected: (_) => setState((){
+                           _selectedCurrency = 'EUR';
+                           _loadSavingsAccounts();
+                        }),
                       ),
                       const SizedBox(width: 8),
                       ChoiceChip(
                         label: const Text('All'),
                         selected: _selectedCurrency == 'All',
-                        onSelected: (_) => setState(() => _selectedCurrency = 'All'),
+                        onSelected: (_) => setState((){
+                           _selectedCurrency = 'All';
+                           _loadSavingsAccounts();
+                        }),
                       ),
                     ],
                   ),
@@ -230,8 +282,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: 300,
+                  Expanded(
                     child: _savingsAccounts.isEmpty
                       ? Center(
                           child: Column(
@@ -265,7 +316,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
                           itemCount: _savingsAccounts.length,
                           itemBuilder: (context, index) {
                             final account = _savingsAccounts[index];
-                            return SavingsAccountWidget(  // ← Define this widget class
+                            return SavingsAccountWidget( 
                               account: account,
                               onEdit: () => _editSavingsAccount(account),
                               onDelete: () => _deleteSavingsAccount(account),
@@ -284,6 +335,20 @@ class _SavingsScreenState extends State<SavingsScreen> {
   }
 
   String _formatTotalSavings() {
-    return r'$' + _totalSavings.toStringAsFixed(2);
+    String currencySymbol;
+    switch (_selectedCurrency) {
+        case 'USD':
+          currencySymbol = r'$';
+          break;
+        case 'EUR':
+          currencySymbol = r'€';
+          break;
+        case 'UAH':
+          currencySymbol = r'₴';
+          break;
+        default:
+          currencySymbol = r'$';
+    }
+    return '$currencySymbol ${_totalSavings.toStringAsFixed(2)}';
   }
 }

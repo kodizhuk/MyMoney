@@ -93,6 +93,35 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @usd.
+  ///
+  /// In en, this message translates to:
+  /// **'USD'**
+  String get usd;
+
+  /// No description provided for @uah.
+  ///
+  /// In en, this message translates to:
+  /// **'UAH!'**
+  String get uah;
+
+  /// No description provided for @eur.
+  ///
+  /// In en, this message translates to:
+  /// **'EUR!'**
+  String get eur;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// Bottom navigation label for income tab
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get income;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
