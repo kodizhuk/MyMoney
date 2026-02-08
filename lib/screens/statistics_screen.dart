@@ -70,13 +70,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       final days = List.generate(daysInMonth, (i) => DateTime(now.year, now.month, i + 1));
       
       final map = <String, double>{};
+      // go through all days
       for (final d in days) {
         map[DateFormat('yyyy-MM-dd').format(d)] = 0.0;
       }
+
+      // go through all income
       for (final tx in _income) {
         final key = DateFormat('yyyy-MM-dd').format(tx.date);
-        if (map.containsKey(key)) map[key] = map[key]! + _toUAH(tx);
+        if (map.containsKey(key)) {
+          map[key] = map[key]! + _toUAH(tx);
+        }
       }
+
+      
       return map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
     } else if (_range == TimeRange.year) {
       // Current year months grouped by month
@@ -157,14 +164,14 @@ Widget build(BuildContext context) {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                //const SizedBox(height: 16),
                 Text(
                   'Income (${_range == TimeRange.month ? 'UAH - last 30 days' : _range == TimeRange.year ? 'UAH - this year' : 'UAH - all time'})',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 12),
+                //const SizedBox(height: 12),
                 SizedBox(
-                  height: 300,
+                  height: 200,
                   child: data.isEmpty
                       ? const Center(child: Text('No data'))
                       : LineChart(
@@ -208,6 +215,66 @@ Widget build(BuildContext context) {
                                 belowBarData: BarAreaData(show: true, color: Colors.green.withOpacity(0.2)),
                               ),
                             ],
+                          ),
+                        ),
+                ),
+                //const SizedBox(height: 12),
+                SizedBox(
+                  height: 200,
+                  child: data.isEmpty
+                      ? const Center(child: Text('No data'))
+                      : BarChart(
+                          BarChartData(
+                            minY: 0,
+                            maxY: maxY > 0 ? maxY * 1.1 : 100,
+                            gridData: FlGridData(show: true),
+                            titlesData: FlTitlesData(
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 50,
+                                  interval: 1,
+                                  getTitlesWidget: (value, meta) {
+                                    final idx = value.toInt();
+                                    if (idx < 0 || idx >= data.length) return const SizedBox.shrink();
+                                    
+                                    final entry = data[idx];  // Assuming data is List<MapEntry<String,double>> or similar
+                                    final valueY = entry.value;  // The double value for this index
+                                    
+                                    if (valueY == 0) return const SizedBox.shrink();  // Hide zero
+                                    
+                                    final label = entry.key;
+                                    String display = DateFormat('dd').format(DateTime.parse(label));
+
+                                    return SideTitleWidget(
+                                      axisSide: meta.axisSide,
+                                      child: Text(display, style: const TextStyle(fontSize: 10)),
+                                    );
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false, reservedSize: 50, interval: interval)),
+                              rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            ),
+
+                            // show Bars
+                            borderData: FlBorderData(show: false),
+                            barGroups: spots.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final spot = entry.value;
+                            return BarChartGroupData(
+                              x: index,
+                              barRods: [
+                                BarChartRodData(
+                                  toY: spot.y,
+                                  color: Colors.green,
+                                  width: 20,
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                                ),
+                              ],
+                            );
+                          }).toList(),
                           ),
                         ),
                 ),
