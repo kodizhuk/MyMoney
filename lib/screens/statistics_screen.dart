@@ -4,7 +4,8 @@ import 'package:intl/intl.dart';
 import '../services/database_service.dart';
 import '../models/transaction.dart' as model;
 
-enum TimeRange { month, year, all }
+//Buttons to select time range for graphs
+enum TimeRange { month, year }
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -44,6 +45,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
   }
 
+  // Set the time range for graphs and refresh the data
   void _setRange(TimeRange r) {
     setState(() {
       _range = r;
@@ -160,7 +162,7 @@ Widget build(BuildContext context) {
                 ),
                 //const SizedBox(height: 16),
                 Text(
-                  'Income (${_range == TimeRange.month ? 'UAH - last 30 days' : _range == TimeRange.year ? 'UAH - this year' : 'UAH - all time'})',
+                  'Income (${_range == TimeRange.month ? 'UAH - month' : 'UAH - year'})',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 //const SizedBox(height: 12),
@@ -238,7 +240,16 @@ Widget build(BuildContext context) {
                                     if (valueY == 0) return const SizedBox.shrink();  // Hide zero
                                     
                                     final label = entry.key;
-                                    String display = DateFormat('dd').format(DateTime.parse(label));
+
+                                    String display;
+                                    if (_range == TimeRange.month) {
+                                      display = DateFormat('dd').format(DateTime.parse(label));
+                                    } else if (_range == TimeRange.year) {
+                                      display = DateFormat('MMM yyyy').format(DateTime.parse('$label-01'));
+                                    } else {
+                                      display = label;
+                                    }
+                                    //String display = DateFormat('dd').format(DateTime.parse(label));
 
                                     return SideTitleWidget(
                                       axisSide: meta.axisSide,
