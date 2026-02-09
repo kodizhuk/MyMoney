@@ -156,12 +156,6 @@ Widget build(BuildContext context) {
                       selected: _range == TimeRange.year,
                       onSelected: (_) => _setRange(TimeRange.year),
                     ),
-                    const SizedBox(width: 8),
-                    ChoiceChip(
-                      label: const Text('All'),
-                      selected: _range == TimeRange.all,
-                      onSelected: (_) => _setRange(TimeRange.all),
-                    ),
                   ],
                 ),
                 //const SizedBox(height: 16),
