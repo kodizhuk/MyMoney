@@ -6,7 +6,6 @@ import '../widgets/savings_account_widget.dart';
 import 'settings_screen.dart';
 import 'statistics_screen.dart';
 
-
 class SavingsScreen extends StatefulWidget {
   final ValueNotifier<int>? navIndexNotifier;
   const SavingsScreen({super.key, this.navIndexNotifier});
@@ -15,10 +14,10 @@ class SavingsScreen extends StatefulWidget {
   State<SavingsScreen> createState() => _SavingsScreenState();
 }
 
-
 class _SavingsScreenState extends State<SavingsScreen> {
   final DatabaseService _dbService = DatabaseService();
-  List<SavingsAccount> _savingsAccounts = [];
+  final List<SavingsAccount> _savingsAccounts = [];
+
   bool _isLoading = true;
   String _selectedCurrency = 'USD';
   double _settingsUsdRate = 42.0;
@@ -51,14 +50,14 @@ class _SavingsScreenState extends State<SavingsScreen> {
       final rates = await _dbService.getExchangeRates();
       _savingsAccounts.clear();
       setState(() {
-        for(final acc in savingsAccounts){
-          if(acc.currency == 'UAH' && _selectedCurrency == 'UAH'){
+        for (final acc in savingsAccounts) {
+          if (acc.currency == 'UAH' && _selectedCurrency == 'UAH') {
             _savingsAccounts.add(acc);
-          }else if(acc.currency == 'USD' && _selectedCurrency == 'USD'){
+          } else if (acc.currency == 'USD' && _selectedCurrency == 'USD') {
             _savingsAccounts.add(acc);
-          }else if(acc.currency == 'EUR' && _selectedCurrency == 'EUR'){
+          } else if (acc.currency == 'EUR' && _selectedCurrency == 'EUR') {
             _savingsAccounts.add(acc);
-          }else if(_selectedCurrency == 'All'){
+          } else if (_selectedCurrency == 'All') {
             _savingsAccounts.add(acc);
           }
         }
@@ -151,28 +150,26 @@ class _SavingsScreenState extends State<SavingsScreen> {
     return _savingsAccounts.fold(0.0, (sum, account) {
       double amount = 0.0;
 
-      if(_selectedCurrency == 'UAH'){
+      if (_selectedCurrency == 'UAH') {
         //count all the account money of the selected currency
-        if(account.currency == 'UAH'){
+        if (account.currency == 'UAH') {
           sum += account.amount;
           //print('curr $amount ${account.currency}');
         }
-      }else if(_selectedCurrency == 'USD'){
-        if(account.currency == 'USD'){
+      } else if (_selectedCurrency == 'USD') {
+        if (account.currency == 'USD') {
           sum += account.amount;
           //print('curr $amount ${account.currency}');
         }
-      }else if (_selectedCurrency == 'EUR'){
-        if(account.currency == 'EUR'){
+      } else if (_selectedCurrency == 'EUR') {
+        if (account.currency == 'EUR') {
           sum += account.amount;
         }
-      }else{
+      } else {
         // count total
         sum += account.amount;
         //print('curr $amount ${account.currency}');
-        
       }
-
 
       // if (account.currency == 'USD') {
       //   amount = account.amount;
@@ -190,12 +187,9 @@ class _SavingsScreenState extends State<SavingsScreen> {
       //   amount = account.amount;
       // }
 
-
       return sum;
     });
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +202,9 @@ class _SavingsScreenState extends State<SavingsScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const StatisticsScreen(),
+                ),
               );
             },
           ),
@@ -237,37 +233,36 @@ class _SavingsScreenState extends State<SavingsScreen> {
                       ChoiceChip(
                         label: Text('UAH'),
                         selected: _selectedCurrency == 'UAH',
-                        onSelected: (_) => setState((){
-                           _selectedCurrency = 'UAH';
-                           _loadSavingsAccounts();
+                        onSelected: (_) => setState(() {
+                          _selectedCurrency = 'UAH';
+                          _loadSavingsAccounts();
                         }),
-                        
                       ),
                       const SizedBox(width: 8),
                       ChoiceChip(
                         label: const Text('USD'),
                         selected: _selectedCurrency == 'USD',
-                        onSelected: (_) => setState((){
-                           _selectedCurrency = 'USD';
-                           _loadSavingsAccounts();
+                        onSelected: (_) => setState(() {
+                          _selectedCurrency = 'USD';
+                          _loadSavingsAccounts();
                         }),
                       ),
                       const SizedBox(width: 8),
                       ChoiceChip(
                         label: const Text('EUR'),
                         selected: _selectedCurrency == 'EUR',
-                        onSelected: (_) => setState((){
-                           _selectedCurrency = 'EUR';
-                           _loadSavingsAccounts();
+                        onSelected: (_) => setState(() {
+                          _selectedCurrency = 'EUR';
+                          _loadSavingsAccounts();
                         }),
                       ),
                       const SizedBox(width: 8),
                       ChoiceChip(
                         label: const Text('All'),
                         selected: _selectedCurrency == 'All',
-                        onSelected: (_) => setState((){
-                           _selectedCurrency = 'All';
-                           _loadSavingsAccounts();
+                        onSelected: (_) => setState(() {
+                          _selectedCurrency = 'All';
+                          _loadSavingsAccounts();
                         }),
                       ),
                     ],
@@ -286,49 +281,49 @@ class _SavingsScreenState extends State<SavingsScreen> {
                   ),
                   Expanded(
                     child: _savingsAccounts.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.account_balance_wallet,
-                                size: 80,
-                                color: Colors.grey[400],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No savings accounts yet',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.grey[600],
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.account_balance_wallet,
+                                  size: 80,
+                                  color: Colors.grey[400],
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Tap + to add your first savings account',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[500],
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No savings accounts yet',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey[600],
+                                  ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Tap + to add your first savings account',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: _savingsAccounts.length,
+                            itemBuilder: (context, index) {
+                              final account = _savingsAccounts[index];
+                              return SavingsAccountWidget(
+                                account: account,
+                                onEdit: () => _editSavingsAccount(account),
+                                onDelete: () => _deleteSavingsAccount(account),
+                              );
+                            },
                           ),
-                        )
-                      : ListView.builder(
-                          itemCount: _savingsAccounts.length,
-                          itemBuilder: (context, index) {
-                            final account = _savingsAccounts[index];
-                            return SavingsAccountWidget( 
-                              account: account,
-                              onEdit: () => _editSavingsAccount(account),
-                              onDelete: () => _deleteSavingsAccount(account),
-                            );
-                          },
-                        ),
-                    ),
-                  ],
+                  ),
+                ],
               ),
-      ), 
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addSavingsAccount,
         child: const Icon(Icons.add),
@@ -339,17 +334,17 @@ class _SavingsScreenState extends State<SavingsScreen> {
   String _formatTotalSavings() {
     String currencySymbol;
     switch (_selectedCurrency) {
-        case 'USD':
-          currencySymbol = r'$';
-          break;
-        case 'EUR':
-          currencySymbol = r'€';
-          break;
-        case 'UAH':
-          currencySymbol = r'₴';
-          break;
-        default:
-          currencySymbol = r'$';
+      case 'USD':
+        currencySymbol = r'$';
+        break;
+      case 'EUR':
+        currencySymbol = r'€';
+        break;
+      case 'UAH':
+        currencySymbol = r'₴';
+        break;
+      default:
+        currencySymbol = r'$';
     }
     return '$currencySymbol ${_totalSavings.toStringAsFixed(2)}';
   }

@@ -22,6 +22,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   double _usdRate = 42.0;
   double _eurRate = 51.0;
 
+  final List<String> _yearsList = <String>['2024', '2025', '2026'];
+  String? _selectedYear;
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +44,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading income: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error loading income: $e')));
     }
   }
 
@@ -54,12 +59,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   double _toUAH(model.Transaction tx) {
     if (tx.currency == 'UAH') return tx.amount;
-    if (tx.currency == 'USD') return tx.amount * (tx.usdRate > 0 ? tx.usdRate : _usdRate);
+    if (tx.currency == 'USD')
+      return tx.amount * (tx.usdRate > 0 ? tx.usdRate : _usdRate);
     if (tx.currency == 'EUR') return tx.amount * _eurRate;
     return tx.amount;
   }
-
-
 
   // Returns list of (label, value) pairs ordered by time
   List<MapEntry<String, double>> _aggregate() {
@@ -67,10 +71,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     if (_range == TimeRange.month) {
       // get the numbers of days to display based on current month
       //final int daysInMonth = getDaysInMonth(now.year, now.month);
-      final daysInMonth = DateTime(now.year, now.month + 1, 0).day;  // Gets last day number [web:6][web:16]
+      final daysInMonth = DateTime(
+        now.year,
+        now.month + 1,
+        0,
+      ).day; // Gets last day number [web:6][web:16]
       // last 30 days grouped by day
-      final days = List.generate(daysInMonth, (i) => DateTime(now.year, now.month, i + 1));
-      
+      final days = List.generate(
+        daysInMonth,
+        (i) => DateTime(now.year, now.month, i + 1),
+      );
+
       final map = <String, double>{};
       // go through all days
       for (final d in days) {
@@ -85,7 +96,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         }
       }
 
-      
       return map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
     } else if (_range == TimeRange.year) {
       // Current year months grouped by month
@@ -113,179 +123,251 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final data = _aggregate();
-  final spots = <FlSpot>[];
-  for (var i = 0; i < data.length; i++) {
-    spots.add(FlSpot(i.toDouble(), data[i].value));
-  }
+  Widget build(BuildContext context) {
+    final data = _aggregate();
+    final spots = <FlSpot>[];
+    for (var i = 0; i < data.length; i++) {
+      spots.add(FlSpot(i.toDouble(), data[i].value));
+    }
 
-  double maxY = 0;
-  for (var spot in spots) {
-    if (spot.y > maxY) maxY = spot.y;
-  }
-  double interval = maxY > 0 ? (maxY * 1.1) / 5 : 20;
+    double maxY = 0;
+    for (var spot in spots) {
+      if (spot.y > maxY) maxY = spot.y;
+    }
+    double interval = maxY > 0 ? (maxY * 1.1) / 5 : 20;
 
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text('Statistics'),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          onPressed: _loadData,
-        ),
-      ],
-    ),
-    //Buttons
-    body: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ChoiceChip(
-                      label: const Text('Month'),
-                      selected: _range == TimeRange.month,
-                      onSelected: (_) => _setRange(TimeRange.month),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Statistics'),
+        actions: [
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
+        ],
+      ),
+      //Buttons
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Month'),
+                        selected: _range == TimeRange.month,
+                        onSelected: (_) => _setRange(TimeRange.month),
+                      ),
+                      const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: const Text('Year'),
+                        selected: _range == TimeRange.year,
+                        onSelected: (_) => _setRange(TimeRange.year),
+                      ),
+                    ],
+                  ),
+                  DropdownButton<String>(
+                    value: _selectedYear,
+                    icon: const Icon(Icons.arrow_drop_down),
+                    iconSize: 24,
+                    elevation: 16,
+                    style: const TextStyle(
+                      color: Colors.deepPurple,
+                      fontSize: 16,
                     ),
-                    const SizedBox(width: 8),
-                    ChoiceChip(
-                      label: const Text('Year'),
-                      selected: _range == TimeRange.year,
-                      onSelected: (_) => _setRange(TimeRange.year),
+                    underline: Container(
+                      height: 2,
+                      color: Colors.deepPurpleAccent,
                     ),
-                  ],
-                ),
-                //const SizedBox(height: 16),
-                Text(
-                  'Income (${_range == TimeRange.month ? 'UAH - month' : 'UAH - year'})',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                //const SizedBox(height: 12),
-                SizedBox(
-                  height: 200,
-                  child: data.isEmpty
-                      ? const Center(child: Text('No data'))
-                      : LineChart(
-                          LineChartData(
-                            minY: 0,
-                            maxY: maxY > 0 ? maxY * 1.1 : 100,
-                            gridData: FlGridData(show: true),
-                            titlesData: FlTitlesData(
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 50,
-                                  interval: 1,
-                                  getTitlesWidget: (value, meta) {
-                                    final idx = value.toInt();
-                                    if (idx < 0 || idx >= data.length) return const SizedBox.shrink();
-                                    final label = data[idx].key;
-                                    String display;
-                                    if (_range == TimeRange.month) {
-                                      display = DateFormat('dd').format(DateTime.parse(label));
-                                    } else if (_range == TimeRange.year) {
-                                      display = DateFormat('MMM yyyy').format(DateTime.parse('$label-01'));
-                                    } else {
-                                      display = label;
-                                    }
-                                    return SideTitleWidget(axisSide: meta.axisSide, child: Text(display, style: const TextStyle(fontSize: 10)));
-                                  },
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedYear = newValue;
+                      });
+                    },
+                    items: _yearsList.map<DropdownMenuItem<String>>((
+                      String value,
+                    ) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                  //const SizedBox(height: 16),
+                  Text(
+                    'Income (${_range == TimeRange.month ? 'UAH - month' : 'UAH - year'})',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  //const SizedBox(height: 12),
+                  SizedBox(
+                    height: 200,
+                    child: data.isEmpty
+                        ? const Center(child: Text('No data'))
+                        : LineChart(
+                            LineChartData(
+                              minY: 0,
+                              maxY: maxY > 0 ? maxY * 1.1 : 100,
+                              gridData: FlGridData(show: true),
+                              titlesData: FlTitlesData(
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 50,
+                                    interval: 1,
+                                    getTitlesWidget: (value, meta) {
+                                      final idx = value.toInt();
+                                      if (idx < 0 || idx >= data.length)
+                                        return const SizedBox.shrink();
+                                      final label = data[idx].key;
+                                      String display;
+                                      if (_range == TimeRange.month) {
+                                        display = DateFormat(
+                                          'dd',
+                                        ).format(DateTime.parse(label));
+                                      } else if (_range == TimeRange.year) {
+                                        display = DateFormat(
+                                          'MMM yyyy',
+                                        ).format(DateTime.parse('$label-01'));
+                                      } else {
+                                        display = label;
+                                      }
+                                      return SideTitleWidget(
+                                        axisSide: meta.axisSide,
+                                        child: Text(
+                                          display,
+                                          style: const TextStyle(fontSize: 10),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                leftTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 60,
+                                    interval: interval,
+                                  ),
+                                ),
+                                rightTitles: AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                topTitles: AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
                                 ),
                               ),
-                              leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 60, interval: interval)),
-                              rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                            ),
-                            borderData: FlBorderData(show: true),
-                            lineBarsData: [
-                              LineChartBarData(
-                                spots: spots,
-                                isCurved: false,
-                                dotData: FlDotData(show: false),
-                                color: Colors.green,
-                                belowBarData: BarAreaData(show: true, color: Colors.green.withOpacity(0.2)),
-                              ),
-                            ],
-                          ),
-                        ),
-                ),
-                //const SizedBox(height: 12),
-                SizedBox(
-                  height: 200,
-                  child: data.isEmpty
-                      ? const Center(child: Text('No data'))
-                      : BarChart(
-                          BarChartData(
-                            minY: 0,
-                            maxY: maxY > 0 ? maxY * 1.1 : 100,
-                            gridData: FlGridData(show: true),
-                            titlesData: FlTitlesData(
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 50,
-                                  interval: 1,
-                                  getTitlesWidget: (value, meta) {
-                                    final idx = value.toInt();
-                                    if (idx < 0 || idx >= data.length) return const SizedBox.shrink();
-                                    
-                                    final entry = data[idx];  // Assuming data is List<MapEntry<String,double>> or similar
-                                    final valueY = entry.value;  // The double value for this index
-                                    
-                                    if (valueY == 0) return const SizedBox.shrink();  // Hide zero
-                                    
-                                    final label = entry.key;
-
-                                    String display;
-                                    if (_range == TimeRange.month) {
-                                      display = DateFormat('dd').format(DateTime.parse(label));
-                                    } else if (_range == TimeRange.year) {
-                                      display = DateFormat('MMM yyyy').format(DateTime.parse('$label-01'));
-                                    } else {
-                                      display = label;
-                                    }
-                                    //String display = DateFormat('dd').format(DateTime.parse(label));
-
-                                    return SideTitleWidget(
-                                      axisSide: meta.axisSide,
-                                      child: Text(display, style: const TextStyle(fontSize: 10)),
-                                    );
-                                  },
-                                ),
-                              ),
-                              leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false, reservedSize: 50, interval: interval)),
-                              rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                            ),
-
-                            // show Bars
-                            borderData: FlBorderData(show: false),
-                            barGroups: spots.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final spot = entry.value;
-                            return BarChartGroupData(
-                              x: index,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: spot.y,
+                              borderData: FlBorderData(show: true),
+                              lineBarsData: [
+                                LineChartBarData(
+                                  spots: spots,
+                                  isCurved: false,
+                                  dotData: FlDotData(show: false),
                                   color: Colors.green,
-                                  width: 20,
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                                  belowBarData: BarAreaData(
+                                    show: true,
+                                    color: Colors.green.withOpacity(0.2),
+                                  ),
                                 ),
                               ],
-                            );
-                          }).toList(),
+                            ),
                           ),
-                        ),
-                ),
-              ],
-            ),
-    ), // Added closing parenthesis for Padding
-  );
-} // Added closing brace for build method
+                  ),
+                  //const SizedBox(height: 12),
+                  SizedBox(
+                    height: 200,
+                    child: data.isEmpty
+                        ? const Center(child: Text('No data'))
+                        : BarChart(
+                            BarChartData(
+                              minY: 0,
+                              maxY: maxY > 0 ? maxY * 1.1 : 100,
+                              gridData: FlGridData(show: true),
+                              titlesData: FlTitlesData(
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 50,
+                                    interval: 1,
+                                    getTitlesWidget: (value, meta) {
+                                      final idx = value.toInt();
+                                      if (idx < 0 || idx >= data.length)
+                                        return const SizedBox.shrink();
+
+                                      final entry = data[idx];
+                                      final valueY = entry.value;
+
+                                      if (valueY == 0)
+                                        return const SizedBox.shrink(); // Hide zero
+
+                                      final label = entry.key;
+
+                                      String display;
+                                      if (_range == TimeRange.month) {
+                                        display = DateFormat(
+                                          'dd',
+                                        ).format(DateTime.parse(label));
+                                      } else if (_range == TimeRange.year) {
+                                        display = DateFormat(
+                                          'MMM yyyy',
+                                        ).format(DateTime.parse('$label-01'));
+                                      } else {
+                                        display = label;
+                                      }
+                                      //String display = DateFormat('dd').format(DateTime.parse(label));
+
+                                      return SideTitleWidget(
+                                        axisSide: meta.axisSide,
+                                        child: Text(
+                                          display,
+                                          style: const TextStyle(fontSize: 10),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                leftTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: false,
+                                    reservedSize: 50,
+                                    interval: interval,
+                                  ),
+                                ),
+                                rightTitles: AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                topTitles: AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                              ),
+
+                              // show Bars
+                              borderData: FlBorderData(show: false),
+                              barGroups: spots.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final spot = entry.value;
+                                return BarChartGroupData(
+                                  x: index,
+                                  barRods: [
+                                    BarChartRodData(
+                                      toY: spot.y,
+                                      color: Colors.green,
+                                      width: 20,
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(4),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+      ), // Added closing parenthesis for Padding
+    );
+  } // Added closing brace for build method
 }
