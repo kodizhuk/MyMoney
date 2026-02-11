@@ -4,6 +4,28 @@ import 'package:intl/intl.dart';
 import '../services/database_service.dart';
 import '../models/transaction.dart' as model;
 
+class DateSelector extends ChangeNotifier {
+  int _currentDate;
+
+  /// Initializes the [_currentYear] with the current year from [DateTime.now()].
+  DateSelector() : _currentDate = DateTime.now().year;
+
+  /// Getter for the current year.
+  int get currentYear => _currentDate;
+
+  /// Increments the current year by 1 and notifies all registered listeners.
+  void incrementDate() {
+    _currentDate++;
+    notifyListeners();
+  }
+
+  /// Decrements the current year by 1 and notifies all registered listeners.
+  void decrementDate() {
+    _currentDate--;
+    notifyListeners();
+  }
+}
+
 //Buttons to select time range for graphs
 enum TimeRange { month, year }
 
@@ -167,32 +189,32 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       ),
                     ],
                   ),
-                  DropdownButton<String>(
-                    value: _selectedYear,
-                    icon: const Icon(Icons.arrow_drop_down),
-                    iconSize: 24,
-                    elevation: 16,
-                    style: const TextStyle(
-                      color: Colors.deepPurple,
-                      fontSize: 16,
-                    ),
-                    underline: Container(
-                      height: 2,
-                      color: Colors.deepPurpleAccent,
-                    ),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedYear = newValue;
-                      });
-                    },
-                    items: _yearsList.map<DropdownMenuItem<String>>((
-                      String value,
-                    ) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      IconButton(
+                        icon: const Icon(Icons.arrow_left),
+                        iconSize: 48.0,
+                        tooltip: 'Previous Year',
+                        onPressed: null,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          '2024', // Uses yearData from context.watch
+                          style: const TextStyle(
+                            fontSize: 32.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_right),
+                        iconSize: 48.0,
+                        tooltip: 'Next Year',
+                        onPressed: null,
+                      ),
+                    ],
                   ),
                   //const SizedBox(height: 16),
                   Text(
