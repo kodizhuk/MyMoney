@@ -195,15 +195,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       IconButton(
                         icon: const Icon(Icons.arrow_left),
                         iconSize: 48.0,
-                        tooltip: 'Previous Year',
+                        tooltip: 'Previous Date',
                         onPressed: null,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Text(
-                          '2024', // Uses yearData from context.watch
+                          'Feb, 2026', // Uses yearData from context.watch
                           style: const TextStyle(
-                            fontSize: 32.0,
+                            fontSize: 25.0,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -211,7 +211,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       IconButton(
                         icon: const Icon(Icons.arrow_right),
                         iconSize: 48.0,
-                        tooltip: 'Next Year',
+                        tooltip: 'Next Date',
                         onPressed: null,
                       ),
                     ],
