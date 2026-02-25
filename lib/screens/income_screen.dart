@@ -22,6 +22,13 @@ class _IncomeScreenState extends State<IncomeScreen> {
   double _settingsUsdRate = 42.0;
   double _settingsEurRate = 51.0;
 
+  final List<String> incomeCategoriesDefault = [
+    'Salary',
+    'Freelance',
+    'Investments',
+  ];
+
+
   @override
   void initState() {
     super.initState();

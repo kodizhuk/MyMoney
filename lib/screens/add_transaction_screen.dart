@@ -50,6 +50,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _selectedCurrency = widget.existingTransaction!.currency;
     }else {
       // load default sources for new transaction
+      // TODO: sould be from the database, but for now just use defaults
       String _default_source = 'default source';
       if(widget.type == 'income') {
         // _loadIncomeSources();
