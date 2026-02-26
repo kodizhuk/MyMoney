@@ -46,7 +46,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       
     }else {
       // load default sources for new transaction
-      String _default_source = widget.defaultCategories.first;
+      // String _default_source = widget.defaultCategories.first;
+      // _selectedSource = widget.defaultCategories.first;
 
       if(widget.type == 'income') {
         _loadIncomeSources();
@@ -54,9 +55,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         _loadExpenseCategories();
       }
 
-      setState(() {
-        _selectedSource  = _default_source;
-      });
+      // setState(() {
+      //   _selectedSource  = _default_source;
+      // });
     }
   }
   Future<void> _loadIncomeSources() async {
@@ -64,13 +65,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       final rows = await DatabaseService().getSources('income');
       final names = rows.map((r) => (r['name'] as Object).toString()).toList();
       setState(() {
-        _sources = names.isNotEmpty ? names.cast<String>() : widget.defaultCategories;
+        // _sources = names.isNotEmpty ? names.cast<String>() : widget.defaultCategories;
+        _sources = names.isNotEmpty ? names : widget.defaultCategories;
         _selectedSource ??= _sources.first;
       });
     } catch (e) {
       setState(() {
         _sources = widget.defaultCategories;
-        _selectedSource ??= _sources.first;
+        // _selectedSource ??= _sources.first;
       });
     }
   }
@@ -80,13 +82,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       final rows = await DatabaseService().getSources('expense');
       final names = rows.map((r) => (r['name'] as Object).toString()).toList();
       setState(() {
-        _sources = names.isNotEmpty ? names.cast<String>() : widget.defaultCategories;
+        _sources = names.isNotEmpty ? names : widget.defaultCategories;
         _selectedSource ??= _sources.first;
       });
     } catch (e) {
       setState(() {
         _sources = widget.defaultCategories;
-        _selectedSource ??= _sources.first;
+        // _selectedSource ??= _sources.first;
       });
     }
   }
