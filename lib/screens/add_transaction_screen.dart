@@ -29,9 +29,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   List<String> _incomeSources = [];
   List<String> _expenseCategories = [];
 
-  final List<String> _savingCategoriesDefault = [
-    'Default saving',
-  ];
 
   @override
   void initState() {
@@ -107,8 +104,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       case 'expense':
         return widget.defaultCategories;
         //return _expenseCategories;
-      case 'saving':
-        return _savingCategoriesDefault;
       default:
         return ['Other'];
     }
