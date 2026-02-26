@@ -25,9 +25,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   DateTime _selectedDate = DateTime.now();
   String? _selectedSource;
   String _selectedCurrency = 'UAH';
-
-  List<String> _incomeSources = [];
-  List<String> _expenseCategories = [];
+  List<String> _sources = [];
 
 
   @override
@@ -35,92 +33,64 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     super.initState();
     if (widget.existingTransaction != null) {
       // load existing transaction data into form
-      _selectedSource = widget.existingTransaction!.source ?? widget.existingTransaction!.name;
+      
       _amountController.text = widget.existingTransaction!.amount.toString();
       _selectedDate = widget.existingTransaction!.date;
       _selectedCurrency = widget.existingTransaction!.currency;
+      _selectedSource = widget.existingTransaction!.source ?? widget.existingTransaction!.name;
+      if(widget.type == 'income') {
+        _loadIncomeSources();
+      } else if (widget.type == 'expense') {
+        _loadExpenseCategories();
+      }
+      
     }else {
       // load default sources for new transaction
-      // TODO: sould be from the database, but for now just use defaults
       String _default_source = widget.defaultCategories.first;
 
-      // if(widget.type == 'income') {
-      //   // _loadIncomeSources();
-      //   _default_source = widget.defaultCategories.first;
-      // } else if (widget.type == 'expense') {
-      //   // _loadExpenseCategories();
-      //   _default_source = _expencesCategoriesDefault.first;
-      // } else if (widget.type == 'saving') {
-      //   // _loadSavingCategories();
-      //   _default_source = _savingCategoriesDefault.first;
-      // }
+      if(widget.type == 'income') {
+        _loadIncomeSources();
+      } else if (widget.type == 'expense') {
+        _loadExpenseCategories();
+      }
 
       setState(() {
         _selectedSource  = _default_source;
       });
     }
-
-    // _loadIncomeSources();
-    // _loadExpenseCategories();
   }
-
-  Future<void> _loadExpenseCategories() async {
-    try {
-      final rows = await DatabaseService().getSources('expense');
-      final names = rows.map((r) => (r['name'] as Object).toString()).toList();
-      setState(() {
-        _expenseCategories = names.isNotEmpty ? names.cast<String>() : ['Tithes', 'Donations', 'Bills', 'Other'];
-        _selectedSource ??= (_expenseCategories.isNotEmpty ? _expenseCategories.first : null);
-      });
-    } catch (e) {
-      setState(() {
-        _expenseCategories = ['Tithes', 'Donations', 'Bills', 'Other'];
-        _selectedSource ??= _expenseCategories.first;
-      });
-    }
-  }
-
   Future<void> _loadIncomeSources() async {
     try {
       final rows = await DatabaseService().getSources('income');
       final names = rows.map((r) => (r['name'] as Object).toString()).toList();
       setState(() {
-        _incomeSources = names.isNotEmpty ? names.cast<String>() : ['Salary', 'Company2', 'Other'];
-        // If no selected source set, pick first
-        _selectedSource ??= (_incomeSources.isNotEmpty ? _incomeSources.first : null);
+        _sources = names.isNotEmpty ? names.cast<String>() : widget.defaultCategories;
+        _selectedSource ??= _sources.first;
       });
     } catch (e) {
       setState(() {
-        _incomeSources = ['Salary', 'Company2', 'Other'];
-        _selectedSource ??= _incomeSources.first;
+        _sources = widget.defaultCategories;
+        _selectedSource ??= _sources.first;
+      });
+    }
+  }
+  
+  Future<void> _loadExpenseCategories() async {
+    try {
+      final rows = await DatabaseService().getSources('expense');
+      final names = rows.map((r) => (r['name'] as Object).toString()).toList();
+      setState(() {
+        _sources = names.isNotEmpty ? names.cast<String>() : widget.defaultCategories;
+        _selectedSource ??= _sources.first;
+      });
+    } catch (e) {
+      setState(() {
+        _sources = widget.defaultCategories;
+        _selectedSource ??= _sources.first;
       });
     }
   }
 
-  List<String> get _availableSources {
-    switch (widget.type) {
-      case 'income':
-        return widget.defaultCategories;
-      case 'expense':
-        return widget.defaultCategories;
-        //return _expenseCategories;
-      default:
-        return ['Other'];
-    }
-  }
-
-  String get _sourceLabel {
-    switch (widget.type) {
-      case 'income':
-        return 'Source';
-      case 'expense':
-        return 'Category';
-      case 'saving':
-        return 'Category';
-      default:
-        return 'Source';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +157,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               const SizedBox(height: 16),
               DropdownButtonFormField <String>(
                 initialValue: _selectedSource,
-                items: _availableSources.map((source) {
+                items: _sources.map((source) {
                   return DropdownMenuItem(
                     value: source,
                     child: Text(source),
@@ -199,29 +169,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   });
                 },
               ),
-              // DropdownButtonFormField<String>(
-              //   initialValue: _selectedSource,
-              //   decoration: InputDecoration(
-              //     labelText: _sourceLabel,
-              //   ),
-              //   items: _availableSources.map((source) {
-              //     return DropdownMenuItem(
-              //       value: source,
-              //       child: Text(source),
-              //     );
-              //   }).toList(),
-              //   validator: (value) {
-              //     if (value == null || value.isEmpty) {
-              //       return 'Please select a $_sourceLabel';
-              //     }
-              //     return null;
-              //   },
-              //   onChanged: (value) {
-              //     setState(() {
-              //       _selectedSource = value;
-              //     });
-              //   },
-              // ),
               const SizedBox(height: 16),
               ListTile(
                 title: const Text('Date'),
