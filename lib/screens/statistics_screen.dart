@@ -81,8 +81,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   double _toUAH(model.Transaction tx) {
     if (tx.currency == 'UAH') return tx.amount;
-    if (tx.currency == 'USD')
+    if (tx.currency == 'USD') {
       return tx.amount * (tx.usdRate > 0 ? tx.usdRate : _usdRate);
+    }
     if (tx.currency == 'EUR') return tx.amount * _eurRate;
     return tx.amount;
   }
@@ -242,8 +243,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                     interval: 1,
                                     getTitlesWidget: (value, meta) {
                                       final idx = value.toInt();
-                                      if (idx < 0 || idx >= data.length)
+                                      if (idx < 0 || idx >= data.length) {
                                         return const SizedBox.shrink();
+                                      }
                                       final label = data[idx].key;
                                       String display;
                                       if (_range == TimeRange.month) {
@@ -315,14 +317,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                     interval: 1,
                                     getTitlesWidget: (value, meta) {
                                       final idx = value.toInt();
-                                      if (idx < 0 || idx >= data.length)
+                                      if (idx < 0 || idx >= data.length) {
                                         return const SizedBox.shrink();
+                                      }
 
                                       final entry = data[idx];
                                       final valueY = entry.value;
 
-                                      if (valueY == 0)
+                                      if (valueY == 0) {
                                         return const SizedBox.shrink(); // Hide zero
+                                      }
 
                                       final label = entry.key;
 

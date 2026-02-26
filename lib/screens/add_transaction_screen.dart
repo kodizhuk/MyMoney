@@ -8,7 +8,7 @@ class AddTransactionScreen extends StatefulWidget {
   final Transaction? existingTransaction;
   final List<String> defaultCategories;
 
-  AddTransactionScreen({
+  const AddTransactionScreen({
     super.key,
     required this.type,
     required this.defaultCategories,
@@ -38,12 +38,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _selectedDate = widget.existingTransaction!.date;
       _selectedCurrency = widget.existingTransaction!.currency;
       _selectedSource = widget.existingTransaction!.source ?? widget.existingTransaction!.name;
+
       if(widget.type == 'income') {
         _loadIncomeSources();
       } else if (widget.type == 'expense') {
         _loadExpenseCategories();
-      }
-      
+      }     
     }else {
       // load default sources for new transaction
       // String _default_source = widget.defaultCategories.first;
@@ -97,6 +97,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.existingTransaction != null;
+
+    // Ensure selected source is valid after loading sources
+    if (_sources.isNotEmpty && !_sources.contains(_selectedSource)) {
+      _selectedSource = _sources.first;  // Or: _selectedSource = _sources.first;
+    }
 
     return Scaffold(
       appBar: AppBar(
