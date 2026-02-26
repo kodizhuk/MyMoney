@@ -73,9 +73,14 @@ class _IncomeScreenState extends State<IncomeScreen> {
     final result = await Navigator.push<Transaction>(
       context,
       MaterialPageRoute(
-        builder: (context) => const AddTransactionScreen(type: 'income'),
+        builder: (context) => AddTransactionScreen(
+          type: 'income',
+          defaultCategories: incomeCategoriesDefault,  
+          ),
       ),
     );
+
+
 
     if (result != null) {
       try {
@@ -110,6 +115,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
       MaterialPageRoute(
         builder: (context) => AddTransactionScreen(
           type: 'income',
+          defaultCategories: incomeCategoriesDefault, 
           existingTransaction: transaction,
         ),
       ),

@@ -6,10 +6,12 @@ import '../services/database_service.dart';
 class AddTransactionScreen extends StatefulWidget {
   final String type; // 'income', 'expense', or 'saving'
   final Transaction? existingTransaction;
+  final List<String> defaultCategories;
 
-  const AddTransactionScreen({
+  AddTransactionScreen({
     super.key,
     required this.type,
+    required this.defaultCategories,
     this.existingTransaction,
   });
 
@@ -27,14 +29,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   List<String> _incomeSources = [];
   List<String> _expenseCategories = [];
 
-  final List<String> _expencesCategoriesDefault = [
-    'Default expence',
-  ];
-
-  final List<String> _incomeCategoriesDefault = [
-    'Default income',
-  ];
-
   final List<String> _savingCategoriesDefault = [
     'Default saving',
   ];
@@ -51,17 +45,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }else {
       // load default sources for new transaction
       // TODO: sould be from the database, but for now just use defaults
-      String _default_source = 'default source';
-      if(widget.type == 'income') {
-        // _loadIncomeSources();
-        _default_source = _incomeCategoriesDefault.first;
-      } else if (widget.type == 'expense') {
-        // _loadExpenseCategories();
-        _default_source = _expencesCategoriesDefault.first;
-      } else if (widget.type == 'saving') {
-        // _loadSavingCategories();
-        _default_source = _savingCategoriesDefault.first;
-      }
+      String _default_source = widget.defaultCategories.first;
+
+      // if(widget.type == 'income') {
+      //   // _loadIncomeSources();
+      //   _default_source = widget.defaultCategories.first;
+      // } else if (widget.type == 'expense') {
+      //   // _loadExpenseCategories();
+      //   _default_source = _expencesCategoriesDefault.first;
+      // } else if (widget.type == 'saving') {
+      //   // _loadSavingCategories();
+      //   _default_source = _savingCategoriesDefault.first;
+      // }
 
       setState(() {
         _selectedSource  = _default_source;
@@ -108,11 +103,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   List<String> get _availableSources {
     switch (widget.type) {
       case 'income':
-        return _incomeCategoriesDefault;
-        // ! TODO: check
-        //return _incomeSources;
+        return widget.defaultCategories;
       case 'expense':
-      return _expencesCategoriesDefault;
+        return widget.defaultCategories;
         //return _expenseCategories;
       case 'saving':
         return _savingCategoriesDefault;

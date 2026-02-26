@@ -19,6 +19,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   List<Transaction> _expenseTransactions = [];
   bool _isLoading = true;
 
+  final List<String> expenseCategoriesDefault = [
+    'Tithe',
+    'Donateions',
+    'Rent',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -58,7 +64,10 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     final result = await Navigator.push<Transaction>(
       context,
       MaterialPageRoute(
-        builder: (context) => const AddTransactionScreen(type: 'expense'),
+        builder: (context) => AddTransactionScreen(
+          type: 'expense',
+          defaultCategories: expenseCategoriesDefault,
+          ),
       ),
     );
 
@@ -95,6 +104,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       MaterialPageRoute(
         builder: (context) => AddTransactionScreen(
           type: 'expense',
+          defaultCategories: expenseCategoriesDefault,
           existingTransaction: transaction,
         ),
       ),
