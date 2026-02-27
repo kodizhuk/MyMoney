@@ -27,6 +27,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   String _selectedCurrency = 'UAH';
   double? _convertedUsdAmount;
   List<String> _sources = [];
+  double _usdRate = 42.0; // default rate, will be updated from DB
 
 
   @override
@@ -92,7 +93,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       if (_selectedCurrency == 'UAH') {
         final double? amount = double.tryParse(_amountController.text);
         if (amount != null) {
-          _convertedUsdAmount = amount / 42;
+          _convertedUsdAmount = amount / _usdRate;
         } else {
           _convertedUsdAmount = null; // Clear if amount is invalid
         }
@@ -236,7 +237,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     if (_formKey.currentState!.validate()) {
       try {
         final rates = await DatabaseService().getExchangeRates();
-        final usdRate = rates['usd'] ?? 42.0;
+        final usdRate = rates['usd'] ?? _usdRate;
         final transaction = Transaction(
           id: widget.existingTransaction?.id,
           type: widget.type,
@@ -262,7 +263,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           date: _selectedDate,
           name: _selectedSource!,
           amount: double.parse(_amountController.text),
-          amount_usd: double.parse(_amountController.text) / 42.0,
+          amount_usd: double.parse(_amountController.text) / _usdRate,
           source: _selectedSource,
           currency: _selectedCurrency,
         );

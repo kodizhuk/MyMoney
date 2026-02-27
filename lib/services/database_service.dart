@@ -24,11 +24,12 @@ class SavingsAccountsFields {
   static const String tableName = 'savings_accounts';
 
   static const String id = 'id';
+  static const String lastUpdated = 'last_updated';
   static const String name = 'name';
   static const String amount = 'amount';
   static const String amountUsd = 'amount_usd';
-  static const String notes = 'notes';
   static const String currency = 'currency';
+  static const String notes = 'notes';
 }
 
 class SettingsFields {
@@ -196,7 +197,6 @@ class DatabaseService {
     try {
       return await db.insert(TransactionsFields.tableName, transaction.toMap());
     } catch (e) {
-      // If insert fails (e.g., column doesn't exist), try without usd_rate
       final map = transaction.toMap();
       return await db.insert(TransactionsFields.tableName, map);
     }
@@ -261,7 +261,6 @@ class DatabaseService {
     } catch (e) {
       // If insert fails (e.g., column doesn't exist), try without usd_rate
       final map = savingsAccount.toMap();
-      map.remove('usd_rate');
       return await db.insert(SavingsAccountsFields.tableName, map);
     }
   }

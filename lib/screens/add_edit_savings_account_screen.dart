@@ -17,6 +17,7 @@ class _AddEditSavingsAccountScreenState extends State<AddEditSavingsAccountScree
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
   String _selectedCurrency = 'UAH';
+  double _settingsUsdRate = 42.0;
 
   @override
   void initState() {
@@ -131,11 +132,14 @@ class _AddEditSavingsAccountScreenState extends State<AddEditSavingsAccountScree
     if (_formKey.currentState!.validate()) {
       try {
         final rates = await DatabaseService().getExchangeRates();
-        final usdRate = rates['usd'] ?? 42.0;
+        final usdRate = rates['usd'] ?? _settingsUsdRate;
         final account = SavingsAccount(
           id: widget.account?.id,
           name: _nameController.text,
           amount: double.parse(_amountController.text),
+          amountUSD: _selectedCurrency == 'USD'
+              ? double.parse(_amountController.text)
+              : double.parse(_amountController.text) / usdRate,
           notes: _notesController.text.isEmpty ? null : _notesController.text,
           currency: _selectedCurrency,
           usdRate: usdRate,
@@ -148,6 +152,9 @@ class _AddEditSavingsAccountScreenState extends State<AddEditSavingsAccountScree
           id: widget.account?.id,
           name: _nameController.text,
           amount: double.parse(_amountController.text),
+          amountUSD: _selectedCurrency == 'USD'
+              ? double.parse(_amountController.text)
+              : double.parse(_amountController.text) / _settingsUsdRate,
           notes: _notesController.text.isEmpty ? null : _notesController.text,
           currency: _selectedCurrency,
           usdRate: 42.0,

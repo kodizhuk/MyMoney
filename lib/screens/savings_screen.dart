@@ -19,7 +19,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
   final List<SavingsAccount> _savingsAccounts = [];
 
   bool _isLoading = true;
-  String _selectedCurrency = 'USD';
+  String _selectedCurrency = 'All';
   double _settingsUsdRate = 42.0;
   double _settingsEurRate = 51.0;
 
