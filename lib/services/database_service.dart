@@ -100,7 +100,8 @@ class DatabaseService {
         amount REAL NOT NULL,
         amount_usd REAL NOT NULL,
         notes TEXT,
-        currency TEXT NOT NULL DEFAULT 'UAH'
+        currency TEXT NOT NULL DEFAULT 'UAH',
+        last_updated TEXT
       )
     ''');
     await db.execute('''
@@ -194,12 +195,8 @@ class DatabaseService {
   // Transaction CRUD operations
   Future<int> insertTransaction(model.Transaction transaction) async {
     Database db = await database;
-    try {
-      return await db.insert(TransactionsFields.tableName, transaction.toMap());
-    } catch (e) {
-      final map = transaction.toMap();
-      return await db.insert(TransactionsFields.tableName, map);
-    }
+    return await db.insert(TransactionsFields.tableName, transaction.toMap());
+
   }
 
   Future<List<model.Transaction>> getTransactions(String type) async {
@@ -215,24 +212,12 @@ class DatabaseService {
 
   Future<int> updateTransaction(model.Transaction transaction) async {
     Database db = await database;
-    try {
-      return await db.update(
-        TransactionsFields.tableName,
-        transaction.toMap(),
-        where: '${TransactionsFields.id} = ?',
-        whereArgs: [transaction.id],
-      );
-    } catch (e) {
-      // If update fails, try without usd_rate
-      final map = transaction.toMap();
-      map.remove('usd_rate');
-      return await db.update(
-        TransactionsFields.tableName,
-        map,
-        where: '${TransactionsFields.id} = ?',
-        whereArgs: [transaction.id],
-      );
-    }
+    return await db.update(
+      TransactionsFields.tableName,
+      transaction.toMap(),
+      where: '${TransactionsFields.id} = ?',
+      whereArgs: [transaction.id],
+    );
   }
 
   Future<int> deleteTransaction(int id) async {
@@ -256,13 +241,7 @@ class DatabaseService {
   // Savings Account CRUD operations
   Future<int> insertSavingsAccount(SavingsAccount savingsAccount) async {
     Database db = await database;
-    try {
-      return await db.insert(SavingsAccountsFields.tableName, savingsAccount.toMap());
-    } catch (e) {
-      // If insert fails (e.g., column doesn't exist), try without usd_rate
-      final map = savingsAccount.toMap();
-      return await db.insert(SavingsAccountsFields.tableName, map);
-    }
+    return await db.insert(SavingsAccountsFields.tableName, savingsAccount.toMap());
   }
 
   Future<List<SavingsAccount>> getSavingsAccounts() async {
@@ -273,24 +252,13 @@ class DatabaseService {
 
   Future<int> updateSavingsAccount(SavingsAccount savingsAccount) async {
     Database db = await database;
-    try {
-      return await db.update(
-        SavingsAccountsFields.tableName,
-        savingsAccount.toMap(),
-        where: '${SavingsAccountsFields.id} = ?',
-        whereArgs: [savingsAccount.id],
-      );
-    } catch (e) {
-      // If update fails, try without usd_rate
-      final map = savingsAccount.toMap();
-      map.remove('usd_rate');
-      return await db.update(
-        SavingsAccountsFields.tableName,
-        map,
-        where: '${SavingsAccountsFields.id} = ?',
-        whereArgs: [savingsAccount.id],
-      );
-    }
+    return await db.update(
+      SavingsAccountsFields.tableName,
+      savingsAccount.toMap(),
+      where: '${SavingsAccountsFields.id} = ?',
+      whereArgs: [savingsAccount.id],
+    );
+
   }
 
   Future<int> deleteSavingsAccount(int id) async {

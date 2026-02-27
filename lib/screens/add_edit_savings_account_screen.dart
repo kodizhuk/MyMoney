@@ -130,38 +130,22 @@ class _AddEditSavingsAccountScreenState extends State<AddEditSavingsAccountScree
 
   void _saveAccount() async {
     if (_formKey.currentState!.validate()) {
-      try {
-        final rates = await DatabaseService().getExchangeRates();
-        final usdRate = rates['usd'] ?? _settingsUsdRate;
-        final account = SavingsAccount(
-          id: widget.account?.id,
-          name: _nameController.text,
-          amount: double.parse(_amountController.text),
-          amountUSD: _selectedCurrency == 'USD'
-              ? double.parse(_amountController.text)
-              : double.parse(_amountController.text) / usdRate,
-          notes: _notesController.text.isEmpty ? null : _notesController.text,
-          currency: _selectedCurrency,
-          usdRate: usdRate,
-        );
 
-        Navigator.pop(context, account);
-      } catch (e) {
-        // fallback to default rate
-        final account = SavingsAccount(
-          id: widget.account?.id,
-          name: _nameController.text,
-          amount: double.parse(_amountController.text),
-          amountUSD: _selectedCurrency == 'USD'
-              ? double.parse(_amountController.text)
-              : double.parse(_amountController.text) / _settingsUsdRate,
-          notes: _notesController.text.isEmpty ? null : _notesController.text,
-          currency: _selectedCurrency,
-          usdRate: 42.0,
-        );
+      final rates = await DatabaseService().getExchangeRates();
+      final usdRate = rates['usd'] ?? _settingsUsdRate;
+      final account = SavingsAccount(
+        id: widget.account?.id,
+        name: _nameController.text,
+        amount: double.parse(_amountController.text),
+        amountUSD: _selectedCurrency == 'USD'
+            ? double.parse(_amountController.text)
+            : (double.parse(_amountController.text) / usdRate * 100).round() / 100.0,
+        notes: _notesController.text.isEmpty ? null : _notesController.text,
+        currency: _selectedCurrency,
+        lastUpdated: DateTime.now(),
+      );
 
-        Navigator.pop(context, account);
-      }
+      Navigator.pop(context, account);
     }
   }
 

@@ -64,7 +64,11 @@ Supports voice cloning and 1158 languages!
         - flutter clean
         - flutter build windows
         - flutter build apk
-        - the apk will be located here  build\app\outputs\flutter-apk\app-release.apk
+        - the apk will be located here build\app\outputs\flutter-apk\app-release.apk
+     - **Database Location for windows**
+     ```bash
+        \MyMoney\.dart_tool\sqflite_common_ffi\databases
+      ```
 
 ## Folder Structure
 ```bash

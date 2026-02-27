@@ -235,41 +235,27 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   void _saveTransaction() async {
     if (_formKey.currentState!.validate()) {
-      try {
-        final rates = await DatabaseService().getExchangeRates();
-        final usdRate = rates['usd'] ?? _usdRate;
-        final transaction = Transaction(
-          id: widget.existingTransaction?.id,
-          type: widget.type,
-          date: _selectedDate,
-          name: _selectedSource!,
-          amount: double.parse(_amountController.text),
-          amount_usd: (() {
-            double amount = double.parse(_amountController.text);
-            return _selectedCurrency == 'UAH' 
-              ? (amount / usdRate * 100).round() / 100.0 
-              : (amount * 100).round() / 100.0;
-          }()),
-          source: _selectedSource,
-          currency: _selectedCurrency,
-        );
 
-        Navigator.pop(context, transaction);
-      } catch (e) {
-        // fallback to default rate
-        final transaction = Transaction(
-          id: widget.existingTransaction?.id,
-          type: widget.type,
-          date: _selectedDate,
-          name: _selectedSource!,
-          amount: double.parse(_amountController.text),
-          amount_usd: double.parse(_amountController.text) / _usdRate,
-          source: _selectedSource,
-          currency: _selectedCurrency,
-        );
+      final rates = await DatabaseService().getExchangeRates();
+      final usdRate = rates['usd'] ?? _usdRate;
+      final transaction = Transaction(
+        id: widget.existingTransaction?.id,
+        type: widget.type,
+        date: _selectedDate,
+        name: _selectedSource!,
+        amount: double.parse(_amountController.text),
+        amount_usd: (() {
+          double amount = double.parse(_amountController.text);
+          return _selectedCurrency == 'UAH' 
+            ? (amount / usdRate * 100).round() / 100.0 
+            : (amount * 100).round() / 100.0;
+        }()),
+        source: _selectedSource,
+        currency: _selectedCurrency,
+      );
 
-        Navigator.pop(context, transaction);
-      }
+      Navigator.pop(context, transaction);
+
     }
   }
 

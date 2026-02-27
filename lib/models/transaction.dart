@@ -19,27 +19,6 @@ class Transaction {
     this.currency = 'UAH',
   });
 
-  Transaction copyWith({
-    int? id,
-    String? type,
-    DateTime? date,
-    String? name,
-    double? amount,
-    double? amount_usd,
-    String? source,
-    String? currency,
-  }) {
-    return Transaction(
-      id: id ?? this.id,
-      type: type ?? this.type,
-      date: date ?? this.date,
-      name: name ?? this.name,
-      amount: amount ?? this.amount,
-      amount_usd: amount_usd ?? this.amount_usd,
-      source: source ?? this.source,
-      currency: currency ?? this.currency,
-    );
-  }
 
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{
