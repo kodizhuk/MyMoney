@@ -95,13 +95,21 @@ class SavingsAccountWidget extends StatelessWidget {
             if (account.notes != null && account.notes!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                'Notes: ${account.notes}',
+                '${account.notes}',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[600],
                 ),
               ),
+
             ],
+            Text(
+                'Updated: ${DateFormat.yMMMd().format(account.lastUpdated)}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[500],
+                ),
+              )
           ],
         ),
       ),

@@ -99,6 +99,13 @@ Supports voice cloning and 1158 languages!
     |---date_formatter.dart - Date formatting utilities
 ```
 
+ToDo List:
+- [ ] Statistic Screen should show the graph for month and year
+- [ ] Saving Screen make it look as many Credit cards
+- [ ] Fix calculation for Tithe
+- [ ] Income/Expence screen add filter option, as there will be a lot of data
+- [ ] Add Different Language support 
+
 ### Resources
 A few resources to get you started if this is your first Flutter project:
 

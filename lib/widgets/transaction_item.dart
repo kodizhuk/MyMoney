@@ -125,11 +125,11 @@ class _TransactionItemState extends State<TransactionItem> {
                     Text(
                       DateFormat('MMM dd, yyyy').format(widget.transaction.date),
                     ),
-                    if (widget.transaction.source != null)
-                      Text(
-                        'Source: ${widget.transaction.source}',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
+                    // if (widget.transaction.source != null)
+                    //   Text(
+                    //     'Source: ${widget.transaction.source}',
+                    //     style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    //   ),
                   ],
                 ),
                 trailing: Text(

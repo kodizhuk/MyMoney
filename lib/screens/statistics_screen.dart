@@ -166,6 +166,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
         ],
       ),
+      // TODO: add total for years and months in the title of graphs
+      // TODO: add total Tithes calculation
+      // TODO: filter by category
+      // TODO: add graph/pie chart for income categories
+      // 
       //Buttons
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -174,6 +179,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -219,87 +225,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   ),
                   //const SizedBox(height: 16),
                   Text(
-                    'Income (${_range == TimeRange.month ? 'UAH - month' : 'UAH - year'})',
+                    'Income Total: 1000 UAH ',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  //const SizedBox(height: 12),
-                  SizedBox(
-                    height: 200,
-                    child: data.isEmpty
-                        ? const Center(child: Text('No data'))
-                        : LineChart(
-                            LineChartData(
-                              minY: 0,
-                              maxY: maxY > 0 ? maxY * 1.1 : 100,
-                              gridData: FlGridData(show: true),
-                              titlesData: FlTitlesData(
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    reservedSize: 50,
-                                    interval: 1,
-                                    getTitlesWidget: (value, meta) {
-                                      final idx = value.toInt();
-                                      if (idx < 0 || idx >= data.length) {
-                                        return const SizedBox.shrink();
-                                      }
-                                      final label = data[idx].key;
-                                      String display;
-                                      if (_range == TimeRange.month) {
-                                        display = DateFormat(
-                                          'dd',
-                                        ).format(DateTime.parse(label));
-                                      } else if (_range == TimeRange.year) {
-                                        display = DateFormat(
-                                          'MMM yyyy',
-                                        ).format(DateTime.parse('$label-01'));
-                                      } else {
-                                        display = label;
-                                      }
-                                      return SideTitleWidget(
-                                        axisSide: meta.axisSide,
-                                        child: Text(
-                                          display,
-                                          style: const TextStyle(fontSize: 10),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                leftTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    reservedSize: 60,
-                                    interval: interval,
-                                  ),
-                                ),
-                                rightTitles: AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false),
-                                ),
-                                topTitles: AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false),
-                                ),
-                              ),
-                              borderData: FlBorderData(show: true),
-                              lineBarsData: [
-                                LineChartBarData(
-                                  spots: spots,
-                                  isCurved: false,
-                                  dotData: FlDotData(show: false),
-                                  color: Colors.green,
-                                  belowBarData: BarAreaData(
-                                    show: true,
-                                    color: Colors.green.withOpacity(0.2),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                  ),
-                  //const SizedBox(height: 12),
                   SizedBox(
                     height: 200,
                     child: data.isEmpty
@@ -320,14 +251,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                       if (idx < 0 || idx >= data.length) {
                                         return const SizedBox.shrink();
                                       }
-
                                       final entry = data[idx];
                                       final valueY = entry.value;
-
                                       if (valueY == 0) {
                                         return const SizedBox.shrink(); // Hide zero
                                       }
-
                                       final label = entry.key;
 
                                       String display;
