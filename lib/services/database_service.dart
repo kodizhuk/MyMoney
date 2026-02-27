@@ -15,9 +15,9 @@ class TransactionsFields {
   static const String date = 'date';
   static const String name = 'name';
   static const String amount = 'amount';
+  static const String amountUsd = 'amount_usd';
   static const String source = 'source';
   static const String currency = 'currency';
-  static const String usdRate = 'usd_rate';
 }
 
 class SavingsAccountsFields {
@@ -26,9 +26,9 @@ class SavingsAccountsFields {
   static const String id = 'id';
   static const String name = 'name';
   static const String amount = 'amount';
+  static const String amountUsd = 'amount_usd';
   static const String notes = 'notes';
   static const String currency = 'currency';
-  static const String usdRate = 'usd_rate';
 }
 
 class SettingsFields {
@@ -86,6 +86,7 @@ class DatabaseService {
         date TEXT NOT NULL,
         name TEXT NOT NULL,
         amount REAL NOT NULL,
+        amount_usd REAL NOT NULL,
         source TEXT,
         currency TEXT NOT NULL DEFAULT 'UAH'
       )
@@ -96,6 +97,7 @@ class DatabaseService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         amount REAL NOT NULL,
+        amount_usd REAL NOT NULL,
         notes TEXT,
         currency TEXT NOT NULL DEFAULT 'UAH'
       )
@@ -196,7 +198,6 @@ class DatabaseService {
     } catch (e) {
       // If insert fails (e.g., column doesn't exist), try without usd_rate
       final map = transaction.toMap();
-      map.remove('usd_rate');
       return await db.insert(TransactionsFields.tableName, map);
     }
   }

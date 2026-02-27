@@ -25,6 +25,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   DateTime _selectedDate = DateTime.now();
   String? _selectedSource;
   String _selectedCurrency = 'UAH';
+  double? _convertedUsdAmount;
   List<String> _sources = [];
 
 
@@ -33,7 +34,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     super.initState();
     if (widget.existingTransaction != null) {
       // load existing transaction data into form
-      
       _amountController.text = widget.existingTransaction!.amount.toString();
       _selectedDate = widget.existingTransaction!.date;
       _selectedCurrency = widget.existingTransaction!.currency;
@@ -46,19 +46,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       }     
     }else {
       // load default sources for new transaction
-      // String _default_source = widget.defaultCategories.first;
-      // _selectedSource = widget.defaultCategories.first;
-
       if(widget.type == 'income') {
         _loadIncomeSources();
       } else if (widget.type == 'expense') {
         _loadExpenseCategories();
       }
-
-      // setState(() {
-      //   _selectedSource  = _default_source;
-      // });
     }
+    _updateConvertedUsdAmount();
   }
   Future<void> _loadIncomeSources() async {
     try {
@@ -93,6 +87,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
   }
 
+  Future<void> _updateConvertedUsdAmount() async{
+    setState(() {
+      if (_selectedCurrency == 'UAH') {
+        final double? amount = double.tryParse(_amountController.text);
+        if (amount != null) {
+          _convertedUsdAmount = amount / 42;
+        } else {
+          _convertedUsdAmount = null; // Clear if amount is invalid
+        }
+      } else {
+        _convertedUsdAmount = null; // Clear if currency is not UAH
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,6 +142,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         }
                         return null;
                       },
+                      onChanged: (String value) {
+                        _updateConvertedUsdAmount();
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -161,6 +172,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                 ],
               ),
+              if (_selectedCurrency == 'UAH' && _convertedUsdAmount != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    'USD Equivalent: ${_convertedUsdAmount!.toStringAsFixed(2)} USD',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.green[700],
+                        ),
+                  ),
+                ],
               const SizedBox(height: 16),
               DropdownButtonFormField <String>(
                 initialValue: _selectedSource,
@@ -223,9 +243,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           date: _selectedDate,
           name: _selectedSource!,
           amount: double.parse(_amountController.text),
+          amount_usd: (() {
+            double amount = double.parse(_amountController.text);
+            return _selectedCurrency == 'UAH' 
+              ? (amount / usdRate * 100).round() / 100.0 
+              : (amount * 100).round() / 100.0;
+          }()),
           source: _selectedSource,
           currency: _selectedCurrency,
-          usdRate: usdRate,
         );
 
         Navigator.pop(context, transaction);
@@ -237,9 +262,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           date: _selectedDate,
           name: _selectedSource!,
           amount: double.parse(_amountController.text),
+          amount_usd: double.parse(_amountController.text) / 42.0,
           source: _selectedSource,
           currency: _selectedCurrency,
-          usdRate: 42.0,
         );
 
         Navigator.pop(context, transaction);

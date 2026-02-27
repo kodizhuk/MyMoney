@@ -159,7 +159,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
     double totalIncomeUAH = _incomeTransactions.fold(0.0, (sum, tx) {
       double amt = tx.amount;
       if (tx.currency == 'USD') {
-        final rate = tx.usdRate > 0 ? tx.usdRate : _settingsUsdRate;
+        final rate = 42.0; // Fixed rate for USD to UAH conversion
         amt = tx.amount * rate;
       } else if (tx.currency == 'EUR') {
         final eurRate = _settingsEurRate > 0 ? _settingsEurRate : 1.0;
@@ -173,7 +173,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
       if ((tx.source ?? '').toString().toLowerCase() != 'tithes') return sum;
       double amt = tx.amount;
       if (tx.currency == 'USD') {
-        final rate = tx.usdRate > 0 ? tx.usdRate : _settingsUsdRate;
+        final rate = 42.0; // Fixed rate for USD to UAH conversion
         amt = tx.amount * rate;
       } else if (tx.currency == 'EUR') {
         final eurRate = _settingsEurRate > 0 ? _settingsEurRate : 1.0;

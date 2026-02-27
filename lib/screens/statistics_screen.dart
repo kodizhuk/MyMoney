@@ -82,7 +82,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   double _toUAH(model.Transaction tx) {
     if (tx.currency == 'UAH') return tx.amount;
     if (tx.currency == 'USD') {
-      return tx.amount * (tx.usdRate > 0 ? tx.usdRate : _usdRate);
+      return tx.amount * (42);
     }
     if (tx.currency == 'EUR') return tx.amount * _eurRate;
     return tx.amount;

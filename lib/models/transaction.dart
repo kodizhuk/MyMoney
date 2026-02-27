@@ -4,9 +4,9 @@ class Transaction {
   final DateTime date;
   final String name;
   final double amount;
+  final double amount_usd; // field for USD equivalent
   final String? source; // can be null for some types
   final String currency;
-  final double usdRate;
 
   Transaction({
     this.id,
@@ -14,9 +14,9 @@ class Transaction {
     required this.date,
     required this.name,
     required this.amount,
+    required this.amount_usd,
     this.source,
     this.currency = 'UAH',
-    this.usdRate = 42,
   });
 
   Transaction copyWith({
@@ -25,9 +25,9 @@ class Transaction {
     DateTime? date,
     String? name,
     double? amount,
+    double? amount_usd,
     String? source,
     String? currency,
-    double? usdRate,
   }) {
     return Transaction(
       id: id ?? this.id,
@@ -35,9 +35,9 @@ class Transaction {
       date: date ?? this.date,
       name: name ?? this.name,
       amount: amount ?? this.amount,
+      amount_usd: amount_usd ?? this.amount_usd,
       source: source ?? this.source,
       currency: currency ?? this.currency,
-      usdRate: usdRate ?? this.usdRate,
     );
   }
 
@@ -47,9 +47,9 @@ class Transaction {
       'date': date.toIso8601String(),
       'name': name,
       'amount': amount,
+      'amount_usd': amount_usd,
       'source': source,
       'currency': currency,
-      'usd_rate': usdRate,
     };
     if (id != null) {
       map['id'] = id;
@@ -64,9 +64,9 @@ class Transaction {
       date: DateTime.parse(map['date']),
       name: map['name'],
       amount: map['amount'],
+      amount_usd: map['amount_usd'],
       source: map['source'],
       currency: map['currency'] ?? 'UAH',
-      usdRate: (map['usd_rate'] as num?)?.toDouble() ?? 42.0,
     );
   }
 }
