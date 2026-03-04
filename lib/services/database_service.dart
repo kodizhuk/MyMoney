@@ -34,8 +34,8 @@ class SavingsAccountsFields {
 
 class SettingsFields {
   static const String tableName = 'settings';
+  static const String currency = 'currency';
   static const String usdRate = 'usd_rate';
-  static const String eurRate = 'eur_rate';
 }
 
 class SourcesFields {
@@ -106,8 +106,8 @@ class DatabaseService {
     ''');
     await db.execute('''
       CREATE TABLE settings (
-        usd_rate REAL NOT NULL DEFAULT 42,
-        eur_rate REAL NOT NULL DEFAULT 51
+        currency TEXT NOT NULL DEFAULT 'UAH',
+        usd_rate REAL NOT NULL DEFAULT 43
       )
     ''');
     await db.execute('''
@@ -144,8 +144,8 @@ class DatabaseService {
       // Create settings table for version 4
       await db.execute('''
         CREATE TABLE settings (
-          usd_rate REAL NOT NULL DEFAULT 42,
-          eur_rate REAL NOT NULL DEFAULT 51
+          currency TEXT NOT NULL DEFAULT 'UAH',
+          usd_rate REAL NOT NULL DEFAULT 43
         )
       ''');
       // Create sources table as well
@@ -160,28 +160,27 @@ class DatabaseService {
   }
 
   // Settings operations
-  Future<Map<String, double>> getExchangeRates() async {
-    Database db = await database;
-    try {
-      final rows = await db.query(SettingsFields.tableName, limit: 1);
-      if (rows.isNotEmpty) {
-        final row = rows.first;
-        return {
-          'usd': (row[SettingsFields.usdRate] as num).toDouble(),
-          'eur': (row[SettingsFields.eurRate] as num).toDouble(),
-        };
-      }
-    } catch (_) {
-      // table may not exist yet
+Future<Map<String, dynamic>> getExchangeRates() async {
+  final db = await database;
+  try {
+    final rows = await db.query(SettingsFields.tableName, limit: 1);
+    if (rows.isNotEmpty) {
+      final row = rows.first;
+      return {
+        'currency': row[SettingsFields.currency] as String,
+        'usd_rate': (row[SettingsFields.usdRate] as num).toDouble(),
+      };
     }
-    return {'usd': 42.0, 'eur': 51.0};
-  }
+  } catch (_) {}
+  return {'currency': 'UAH', 'usd_rate': 43.0};
+}
 
-  Future<void> setExchangeRates(double usdRate, double eurRate) async {
+
+  Future<void> setExchangeRates(String currency, double usdRate) async {
     Database db = await database;
     try {
       final rows = await db.query(SettingsFields.tableName, limit: 1);
-      final data = {SettingsFields.usdRate: usdRate, SettingsFields.eurRate: eurRate};
+      final data = {SettingsFields.currency: currency, SettingsFields.usdRate: usdRate};
       if (rows.isNotEmpty) {
         await db.update(SettingsFields.tableName, data);
       } else {

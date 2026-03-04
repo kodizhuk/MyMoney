@@ -17,7 +17,7 @@ class _AddEditSavingsAccountScreenState extends State<AddEditSavingsAccountScree
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
   String _selectedCurrency = 'UAH';
-  double _settingsUsdRate = 42.0;
+  final double _settingsUsdRate = 42.0;
 
   @override
   void initState() {

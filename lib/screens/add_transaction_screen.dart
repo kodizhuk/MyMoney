@@ -27,7 +27,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   String _selectedCurrency = 'UAH';
   double? _convertedUsdAmount;
   List<String> _sources = [];
-  double _usdRate = 42.0; // default rate, will be updated from DB
+  final double _usdRate = 42.0; // default rate, will be updated from DB
 
 
   @override
