@@ -32,13 +32,23 @@ class DateSelector extends ChangeNotifier {
     return year;
   }
 
-  void NextMonth() {
+  void nextMonth() {
     _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
     notifyListeners();
   }
 
-  void PreviousMonth() {
+  void previousMonth() {
     _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
+    notifyListeners();
+  }
+
+  void nextYear() {
+    _currentMonth = DateTime(_currentMonth.year + 1, _currentMonth.month);
+    notifyListeners();
+  }
+
+  void previousYear() {
+    _currentMonth = DateTime(_currentMonth.year - 1, _currentMonth.month);
     notifyListeners();
   }
 }
@@ -176,7 +186,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
     double interval = maxY > 0 ? (maxY * 1.1) / 5 : 20;
 
-    DateSelector monthSelector = DateSelector();
+    DateSelector dateSelector = DateSelector();
 
     return Scaffold(
       appBar: AppBar(
@@ -198,16 +208,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       ChoiceChip(
                         label: const Text('Month'),
                         selected: _range == TimeRange.month,
                         onSelected: (_) => _setRange(TimeRange.month),
                       ),
-                      const SizedBox(width: 8),
                       ChoiceChip(
                         label: const Text('Year'),
                         selected: _range == TimeRange.year,
@@ -223,16 +231,21 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         icon: const Icon(Icons.arrow_left),
                         iconSize: 48.0,
                         tooltip: 'Previous Date',
-                        onPressed: monthSelector.PreviousMonth,
+                        onPressed: 
+                          _range == TimeRange.month
+                          ? dateSelector.previousMonth
+                          : dateSelector.previousYear,
                       ),
-
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: ListenableBuilder(
-                          listenable: monthSelector,
+                          listenable: dateSelector,
                           builder: (context, child) {
                             return Text(
-                              '${monthSelector.getMonthName()}, ${monthSelector.getYear()}',
+                                _range == TimeRange.month
+                                ? '${dateSelector.getMonthName()}, ${dateSelector.getYear()}'
+                                : dateSelector.getYear(),
+
                               style: const TextStyle(
                                 fontSize: 25.0,
                                 fontWeight: FontWeight.bold,
@@ -241,13 +254,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           },
                         ),
                       ),
-
                       IconButton(
                         icon: const Icon(Icons.arrow_right),
                         iconSize: 48.0,
                         tooltip: 'Next Date',
-                        onPressed: monthSelector.NextMonth,
-                      ),
+                        onPressed: 
+                          _range == TimeRange.month
+                          ? dateSelector.nextMonth
+                          : dateSelector.nextYear,
+              ),
                     ],
                   ),
                   
