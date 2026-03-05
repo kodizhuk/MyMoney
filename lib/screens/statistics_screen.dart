@@ -245,7 +245,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                 _range == TimeRange.month
                                 ? '${dateSelector.getMonthName()}, ${dateSelector.getYear()}'
                                 : dateSelector.getYear(),
-
                               style: const TextStyle(
                                 fontSize: 25.0,
                                 fontWeight: FontWeight.bold,
@@ -262,7 +261,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           _range == TimeRange.month
                           ? dateSelector.nextMonth
                           : dateSelector.nextYear,
-              ),
+                      ),
                     ],
                   ),
                   
@@ -275,14 +274,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   ),
                   
                   SizedBox(
-                    height: 200,
+                    height: 300,
                     child: data.isEmpty
                         ? const Center(child: Text('No data'))
                         : BarChart(
                             BarChartData(
                               minY: 0,
                               maxY: maxY > 0 ? maxY * 1.1 : 100,
-                              gridData: FlGridData(show: true),
+                              gridData: FlGridData(show: false),
                               titlesData: FlTitlesData(
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
@@ -341,12 +340,30 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               ),
 
                               // show Bars
-                              borderData: FlBorderData(show: false),
+                              // borderData: FlBorderData(show: false),
+                              barTouchData: BarTouchData(
+                                touchTooltipData: BarTouchTooltipData(
+                                  tooltipBgColor: Colors.white, 
+                                  tooltipPadding: EdgeInsets.zero,
+                                  tooltipMargin: 0,
+                                  tooltipRoundedRadius: 0,
+                                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                                    return BarTooltipItem(
+                                      //the actual value to show in tooltip 
+                                      rod.toY.toInt() > 10000 ? '${(rod.toY / 1000).toStringAsFixed(0)}k' : '${rod.toY.toInt()}',
+                                      const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                                    );
+                                  },
+                                ),
+                              ),
                               barGroups: spots.asMap().entries.map((entry) {
-                                final index = entry.key;
                                 final spot = entry.value;
+                                if (spot.y == 0) {
+                                  // Show empty bar for zero values to keep spacing, but make it invisible
+                                  return BarChartGroupData(x: entry.key, barRods: []);  // Empty bars
+                                }
                                 return BarChartGroupData(
-                                  x: index,
+                                  x: entry.key,
                                   barRods: [
                                     BarChartRodData(
                                       toY: spot.y,
@@ -356,7 +373,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                         top: Radius.circular(4),
                                       ),
                                     ),
-                                  ],
+                                  ],                                  
+                                  showingTooltipIndicators: [0],
                                 );
                               }).toList(),
                             ),
