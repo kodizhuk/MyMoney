@@ -5,6 +5,7 @@ import '../widgets/transaction_item.dart';
 import 'add_transaction_screen.dart';
 import 'settings_screen.dart';
 import 'statistics_screen.dart';
+import 'package:mp_month_picker/mp_month_picker.dart';
 
 class IncomeScreen extends StatefulWidget {
   final ValueNotifier<int>? navIndexNotifier;
@@ -240,12 +241,14 @@ class _IncomeScreenState extends State<IncomeScreen> {
           ),
         ],
       ),
+      
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _incomeTransactions.isEmpty
           ? const Center(
               child: Text('No income transactions yet'),
             )
+          
           : ListView.builder(
               itemCount: _incomeTransactions.length,
               itemBuilder: (context, index) {
@@ -256,6 +259,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
                 );
               },
             ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: _addTransaction,
         child: const Icon(Icons.add),

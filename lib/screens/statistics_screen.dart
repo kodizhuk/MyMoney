@@ -4,24 +4,41 @@ import 'package:intl/intl.dart';
 import '../services/database_service.dart';
 import '../models/transaction.dart' as model;
 
+
+
+
 class DateSelector extends ChangeNotifier {
-  int _currentDate;
+  DateTime _currentMonth;
 
-  /// Initializes the [_currentYear] with the current year from [DateTime.now()].
-  DateSelector() : _currentDate = DateTime.now().year;
+  /// Initializes the _currentMonth with the current month from [DateTime.now()].
+  DateSelector() : _currentMonth = DateTime.now();
 
-  /// Getter for the current year.
-  int get currentYear => _currentDate;
+  /// Getter for the current month.
+  DateTime get currentMonth => _currentMonth;
 
-  /// Increments the current year by 1 and notifies all registered listeners.
-  void incrementDate() {
-    _currentDate++;
+  /// Sets the current month to newMonth and notifies all registered listeners.
+  void setMonth(DateTime newMonth) {
+    _currentMonth = newMonth;
     notifyListeners();
   }
 
-  /// Decrements the current year by 1 and notifies all registered listeners.
-  void decrementDate() {
-    _currentDate--;
+  String getMonthName() {
+    final monthName = DateFormat('MMMM').format(_currentMonth);
+    return monthName;
+  }
+
+  String getYear() {
+    final year = DateFormat('yyyy').format(_currentMonth);
+    return year;
+  }
+
+  void NextMonth() {
+    _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
+    notifyListeners();
+  }
+
+  void PreviousMonth() {
+    _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
     notifyListeners();
   }
 }
@@ -159,6 +176,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
     double interval = maxY > 0 ? (maxY * 1.1) / 5 : 20;
 
+    DateSelector monthSelector = DateSelector();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistics'),
@@ -196,34 +215,42 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       ),
                     ],
                   ),
+                  
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.arrow_left),
                         iconSize: 48.0,
                         tooltip: 'Previous Date',
-                        onPressed: null,
+                        onPressed: monthSelector.PreviousMonth,
                       ),
+
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          'Feb, 2026', // Uses yearData from context.watch
-                          style: const TextStyle(
-                            fontSize: 25.0,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: ListenableBuilder(
+                          listenable: monthSelector,
+                          builder: (context, child) {
+                            return Text(
+                              '${monthSelector.getMonthName()}, ${monthSelector.getYear()}',
+                              style: const TextStyle(
+                                fontSize: 25.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
                         ),
                       ),
+
                       IconButton(
                         icon: const Icon(Icons.arrow_right),
                         iconSize: 48.0,
                         tooltip: 'Next Date',
-                        onPressed: null,
+                        onPressed: monthSelector.NextMonth,
                       ),
                     ],
                   ),
-                  //const SizedBox(height: 16),
+                  
                   Text(
                     'Income Total: 1000 UAH ',
                     style: const TextStyle(
@@ -231,6 +258,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  
                   SizedBox(
                     height: 200,
                     child: data.isEmpty
@@ -321,7 +349,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   ),
                 ],
               ),
-      ), // Added closing parenthesis for Padding
+      ), 
     );
-  } // Added closing brace for build method
+  }
 }
