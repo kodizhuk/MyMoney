@@ -1,7 +1,5 @@
-# 📚 MyMoney
-CPU/GPU Converter from E-Book to audiobook with chapters and metadata<br/>
-using XTTSv2, Piper-TTS, Vits, Fairseq, Tacotron2, YourTTS and much more.<br/>
-Supports voice cloning and 1158 languages!
+# 📚 IncomeTracker
+IncomeTracker is a financial tracker that simplifies managing your income, expenses, and long-term savings in one place. It features detailed visual statistics to break down earnings by category and includes a built-in calculator to automatically determine your church tithe. No AD, no tracking, all data are saved in local database on your device.
 > [!IMPORTANT]
 **This project is for personal use, are in development right now.** <br>
 
@@ -102,7 +100,7 @@ Supports voice cloning and 1158 languages!
 ToDo List:
 - [ ] Statistic Screen should show the graph for month and year
 - [ ] Saving Screen make it look as many Credit cards
-- [ ] Fix calculation for Tithe
+- [x] Fix calculation for Tithe
 - [ ] Income/Expence screen add filter option, as there will be a lot of data
 - [ ] Add Different Language support 
 
@@ -121,3 +119,4 @@ samples, guidance on mobile development, and a full API reference.flut
 
 ## Special Thanks
 - **perplexity.ai**: for helping to learn the Dart and Flutter
+- **Gemini**: for icon drawing and helping with the description
