@@ -71,9 +71,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   double _usdRate = 42.0;
   double _eurRate = 51.0;
 
-  final List<String> _yearsList = <String>['2024', '2025', '2026'];
-  String? _selectedYear;
-
   @override
   void initState() {
     super.initState();
@@ -117,19 +114,24 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   // Returns list of (label, value) pairs ordered by time
   List<MapEntry<String, double>> _aggregate() {
-    final now = DateTime.now();
+
+
+    final selectedDate = DateTime.now();
+
+    
     if (_range == TimeRange.month) {
       // get the numbers of days to display based on current month
       //final int daysInMonth = getDaysInMonth(now.year, now.month);
       final daysInMonth = DateTime(
-        now.year,
-        now.month + 1,
+        selectedDate.year,
+        selectedDate.month + 1,
         0,
-      ).day; // Gets last day number [web:6][web:16]
+      ).day; // Gets last day number 
+
       // last 30 days grouped by day
       final days = List.generate(
         daysInMonth,
-        (i) => DateTime(now.year, now.month, i + 1),
+        (i) => DateTime(selectedDate.year, selectedDate.month, i + 1),
       );
 
       final map = <String, double>{};
@@ -149,13 +151,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       return map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
     } else if (_range == TimeRange.year) {
       // Current year months grouped by month
-      final months = List.generate(12, (i) => DateTime(now.year, i + 1, 1));
+      final months = List.generate(12, (i) => DateTime(selectedDate.year, i + 1, 1));
       final map = <String, double>{};
       for (final m in months) {
         map[DateFormat('yyyy-MM').format(m)] = 0.0;
       }
       for (final tx in _income) {
-        if (tx.date.year == now.year) {
+        if (tx.date.year == selectedDate.year) {
           final key = DateFormat('yyyy-MM').format(tx.date);
           if (map.containsKey(key)) map[key] = map[key]! + _toUAH(tx);
         }
