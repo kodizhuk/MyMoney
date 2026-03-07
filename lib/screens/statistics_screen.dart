@@ -5,54 +5,6 @@ import '../services/database_service.dart';
 import '../models/transaction.dart' as model;
 
 
-
-
-class DateSelector extends ChangeNotifier {
-  DateTime _currentMonth;
-
-  /// Initializes the _currentMonth with the current month from [DateTime.now()].
-  DateSelector() : _currentMonth = DateTime.now();
-
-  /// Getter for the current month.
-  DateTime get currentMonth => _currentMonth;
-
-  /// Sets the current month to newMonth and notifies all registered listeners.
-  void setMonth(DateTime newMonth) {
-    _currentMonth = newMonth;
-    notifyListeners();
-  }
-
-  String getMonthName() {
-    final monthName = DateFormat('MMMM').format(_currentMonth);
-    return monthName;
-  }
-
-  String getYear() {
-    final year = DateFormat('yyyy').format(_currentMonth);
-    return year;
-  }
-
-  void nextMonth() {
-    _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
-    notifyListeners();
-  }
-
-  void previousMonth() {
-    _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
-    notifyListeners();
-  }
-
-  void nextYear() {
-    _currentMonth = DateTime(_currentMonth.year + 1, _currentMonth.month);
-    notifyListeners();
-  }
-
-  void previousYear() {
-    _currentMonth = DateTime(_currentMonth.year - 1, _currentMonth.month);
-    notifyListeners();
-  }
-}
-
 //Buttons to select time range for graphs
 enum TimeRange { month, year }
 
@@ -70,6 +22,33 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   TimeRange _range = TimeRange.month;
   double _usdRate = 42.0;
   double _eurRate = 51.0;
+
+  // methods for the current view
+  DateTime _selectedDate = DateTime.now();
+  String getDate(){
+    if (_range == TimeRange.month) {
+      return DateFormat('MMMM yyyy').format(_selectedDate);
+    } else {
+      return DateFormat('yyyy').format(_selectedDate);
+    }
+  }
+  void nextDate() {
+    if (_range == TimeRange.month) {
+      _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1);
+    } else if (_range == TimeRange.year) {
+      _selectedDate = DateTime(_selectedDate.year + 1, _selectedDate.month);
+    }
+    setState(() {});
+  }
+  void previousDate() {
+    if (_range == TimeRange.month) {
+      _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1);
+    } else if (_range == TimeRange.year) {
+      _selectedDate = DateTime(_selectedDate.year - 1, _selectedDate.month);
+    }
+    setState(() {});
+  }
+
 
   @override
   void initState() {
@@ -104,34 +83,26 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   double _toUAH(model.Transaction tx) {
-    if (tx.currency == 'UAH') return tx.amount;
-    if (tx.currency == 'USD') {
-      return tx.amount * (42);
-    }
-    if (tx.currency == 'EUR') return tx.amount * _eurRate;
     return tx.amount;
   }
 
   // Returns list of (label, value) pairs ordered by time
   List<MapEntry<String, double>> _aggregate() {
+    // final _selectedDate = DateTime.now();
 
-
-    final selectedDate = DateTime.now();
-
-    
     if (_range == TimeRange.month) {
       // get the numbers of days to display based on current month
       //final int daysInMonth = getDaysInMonth(now.year, now.month);
       final daysInMonth = DateTime(
-        selectedDate.year,
-        selectedDate.month + 1,
+        _selectedDate.year,
+        _selectedDate.month + 1,
         0,
       ).day; // Gets last day number 
 
       // last 30 days grouped by day
       final days = List.generate(
         daysInMonth,
-        (i) => DateTime(selectedDate.year, selectedDate.month, i + 1),
+        (i) => DateTime(_selectedDate.year, _selectedDate.month, i + 1),
       );
 
       final map = <String, double>{};
@@ -151,13 +122,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       return map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
     } else if (_range == TimeRange.year) {
       // Current year months grouped by month
-      final months = List.generate(12, (i) => DateTime(selectedDate.year, i + 1, 1));
+      final months = List.generate(12, (i) => DateTime(_selectedDate.year, i + 1, 1));
       final map = <String, double>{};
       for (final m in months) {
         map[DateFormat('yyyy-MM').format(m)] = 0.0;
       }
       for (final tx in _income) {
-        if (tx.date.year == selectedDate.year) {
+        if (tx.date.year == _selectedDate.year) {
           final key = DateFormat('yyyy-MM').format(tx.date);
           if (map.containsKey(key)) map[key] = map[key]! + _toUAH(tx);
         }
@@ -188,8 +159,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
     double interval = maxY > 0 ? (maxY * 1.1) / 5 : 20;
 
-    DateSelector dateSelector = DateSelector();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistics'),
@@ -210,6 +179,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Month/Year selector
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
@@ -225,7 +195,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       ),
                     ],
                   ),
-                  
+                  // Date selector with arrows left and right
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
@@ -233,36 +203,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         icon: const Icon(Icons.arrow_left),
                         iconSize: 48.0,
                         tooltip: 'Previous Date',
-                        onPressed: 
-                          _range == TimeRange.month
-                          ? dateSelector.previousMonth
-                          : dateSelector.previousYear,
+                        onPressed: previousDate,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: ListenableBuilder(
-                          listenable: dateSelector,
-                          builder: (context, child) {
-                            return Text(
-                                _range == TimeRange.month
-                                ? '${dateSelector.getMonthName()}, ${dateSelector.getYear()}'
-                                : dateSelector.getYear(),
-                              style: const TextStyle(
-                                fontSize: 25.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
-                          },
+                        child: Text(
+                          getDate(),
+                          style: const TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.arrow_right),
                         iconSize: 48.0,
                         tooltip: 'Next Date',
-                        onPressed: 
-                          _range == TimeRange.month
-                          ? dateSelector.nextMonth
-                          : dateSelector.nextYear,
+                        onPressed: nextDate,
                       ),
                     ],
                   ),
