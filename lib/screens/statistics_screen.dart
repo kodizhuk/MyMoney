@@ -25,14 +25,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   // methods for the current view
   DateTime _selectedDate = DateTime.now();
-  String getDate(){
+  String _getDate(){
     if (_range == TimeRange.month) {
       return DateFormat('MMMM yyyy').format(_selectedDate);
     } else {
       return DateFormat('yyyy').format(_selectedDate);
     }
   }
-  void nextDate() {
+  void _nextDate() {
     if (_range == TimeRange.month) {
       _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1);
     } else if (_range == TimeRange.year) {
@@ -40,7 +40,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
     setState(() {});
   }
-  void previousDate() {
+  void _previousDate() {
     if (_range == TimeRange.month) {
       _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1);
     } else if (_range == TimeRange.year) {
@@ -49,6 +49,24 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     setState(() {});
   }
 
+  String _getTotal() {
+    double total = 0;
+    for (final tx in _income) {
+      if (_range == TimeRange.month) {
+        if (tx.date.year == _selectedDate.year && tx.date.month == _selectedDate.month) {
+          total += _toUAH(tx);
+        }
+      } else {
+        if (tx.date.year == _selectedDate.year) {
+          total += _toUAH(tx);
+        }
+      }
+    }
+
+    var formatter = NumberFormat('#,##,000');
+    String _numberTotal = formatter.format(total).trim().replaceAll(',', ' ') ;
+    return total > 0 ? '$_numberTotal UAH' : '0 UAH';
+  }
 
   @override
   void initState() {
@@ -118,8 +136,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           map[key] = map[key]! + _toUAH(tx);
         }
       }
-
       return map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+
     } else if (_range == TimeRange.year) {
       // Current year months grouped by month
       final months = List.generate(12, (i) => DateTime(_selectedDate.year, i + 1, 1));
@@ -134,6 +152,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         }
       }
       return map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+
     } else {
       // All time grouped by year
       final map = <String, double>{};
@@ -203,12 +222,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         icon: const Icon(Icons.arrow_left),
                         iconSize: 48.0,
                         tooltip: 'Previous Date',
-                        onPressed: previousDate,
+                        onPressed: _previousDate,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Text(
-                          getDate(),
+                          _getDate(),
                           style: const TextStyle(
                             fontSize: 20.0,
                             fontWeight: FontWeight.bold,
@@ -219,13 +238,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         icon: const Icon(Icons.arrow_right),
                         iconSize: 48.0,
                         tooltip: 'Next Date',
-                        onPressed: nextDate,
+                        onPressed: _nextDate,
                       ),
                     ],
                   ),
                   
                   Text(
-                    'Income Total: 1000 UAH ',
+                    'Income Total: '+_getTotal(),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
