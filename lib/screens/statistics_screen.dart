@@ -185,7 +185,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
         ],
       ),
-      // TODO: add total for years and months in the title of graphs
       // TODO: add total Tithes calculation
       // TODO: filter by category
       // TODO: add graph/pie chart for income categories
@@ -244,7 +243,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   ),
                   
                   Text(
-                    'Income Total: '+_getTotal(),
+                    'Income Total: '+ _getTotal(),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -320,15 +319,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               // show Bars
                               // borderData: FlBorderData(show: false),
                               barTouchData: BarTouchData(
+                                enabled: true,
                                 touchTooltipData: BarTouchTooltipData(
-                                  tooltipBgColor: Colors.white, 
+                                  tooltipBgColor: Colors.transparent, 
                                   tooltipPadding: EdgeInsets.zero,
                                   tooltipMargin: 0,
                                   tooltipRoundedRadius: 0,
                                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                                     return BarTooltipItem(
                                       //the actual value to show in tooltip 
-                                      rod.toY.toInt() > 10000 ? '${(rod.toY / 1000).toStringAsFixed(0)}k' : '${rod.toY.toInt()}',
+                                      rod.toY.toInt() > 1000 ? '${(rod.toY / 1000).toStringAsFixed(0)}k' : '${rod.toY.toInt()}',
                                       const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                                     );
                                   },
@@ -351,8 +351,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                         top: Radius.circular(4),
                                       ),
                                     ),
-                                  ],                                  
-                                  showingTooltipIndicators: [0],
+                                  ],
+
+                                  // showingTooltipIndicators: [0],
                                 );
                               }).toList(),
                             ),
