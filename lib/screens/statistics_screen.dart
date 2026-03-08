@@ -243,7 +243,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   ),
                   
                   Text(
-                    'Income Total: '+ _getTotal(),
+                    'Income Total: ${_getTotal()}',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -292,7 +292,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                       //String display = DateFormat('dd').format(DateTime.parse(label));
 
                                       return SideTitleWidget(
-                                        axisSide: meta.axisSide,
+                                        // axisSide: meta.axisSide,
+                                        meta: meta,
                                         child: Text(
                                           display,
                                           style: const TextStyle(fontSize: 10),
@@ -303,7 +304,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                 ),
                                 leftTitles: AxisTitles(
                                   sideTitles: SideTitles(
-                                    showTitles: false,
+                                    showTitles: true,
                                     reservedSize: 50,
                                     interval: interval,
                                   ),
@@ -321,10 +322,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               barTouchData: BarTouchData(
                                 enabled: true,
                                 touchTooltipData: BarTouchTooltipData(
-                                  tooltipBgColor: Colors.transparent, 
+                                  getTooltipColor: (BarChartGroupData group) => Colors.transparent, 
                                   tooltipPadding: EdgeInsets.zero,
                                   tooltipMargin: 0,
-                                  tooltipRoundedRadius: 0,
+                                  tooltipBorderRadius: BorderRadius.zero,
                                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                                     return BarTooltipItem(
                                       //the actual value to show in tooltip 
