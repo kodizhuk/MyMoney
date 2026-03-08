@@ -262,7 +262,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               titlesData: FlTitlesData(
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
-                                    showTitles: true,
+                                    showTitles: false,
                                     reservedSize: 50,
                                     interval: 1,
                                     getTitlesWidget: (value, meta) {
