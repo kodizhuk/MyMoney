@@ -254,7 +254,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
                   ],
                   ),
                   Container(
-                  padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.all(8),
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Total Savings: ${_formatTotalSavings()}',
