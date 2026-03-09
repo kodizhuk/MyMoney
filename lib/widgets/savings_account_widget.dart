@@ -31,7 +31,7 @@ class SavingsAccountWidget extends StatelessWidget {
     final currencyFormat = NumberFormat.currency(symbol: symbol);
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

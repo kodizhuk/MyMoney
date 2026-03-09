@@ -6,6 +6,7 @@ import 'add_edit_savings_account_screen.dart';
 import '../widgets/savings_account_widget.dart';
 import 'settings_screen.dart';
 import 'statistics_screen.dart';
+import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
 
 class SavingsScreen extends StatefulWidget {
   final ValueNotifier<int>? navIndexNotifier;
@@ -24,11 +25,30 @@ class _SavingsScreenState extends State<SavingsScreen> {
   double _settingsUsdRate = 42.0;
   double _settingsEurRate = 51.0;
 
+  late List<DraggableGridItem> _items;
+
   @override
   void initState() {
     super.initState();
     _loadSavingsAccounts();
     widget.navIndexNotifier?.addListener(_onNavIndexChanged);
+    
+    _items = List.generate(
+      6,
+      (index) => DraggableGridItem(
+        isDraggable: true,
+        child: Container(
+          color: Colors.primaries[index % Colors.primaries.length],
+          child: Center(
+            child: Text(
+              'Item $index',
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+            ),
+          ),
+        ),
+      ),
+    );
+
   }
 
   void _onNavIndexChanged() {
@@ -171,10 +191,17 @@ class _SavingsScreenState extends State<SavingsScreen> {
 
       return sum;
     });
-  }
+  }  
+
+
+
 
   @override
   Widget build(BuildContext context) {
+    
+    final List<String> items;
+    items = List<String>.generate(20, (i) => 'Item ${i + 1}');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Savings'),
@@ -201,7 +228,6 @@ class _SavingsScreenState extends State<SavingsScreen> {
           ),
         ],
       ),
-      // Buttons
       body: Padding(
         padding: EdgeInsets.all(8),
         child: _isLoading
@@ -291,25 +317,21 @@ class _SavingsScreenState extends State<SavingsScreen> {
                         ],
                       ),
                       )
-                    : GridView.builder(
-                      padding: EdgeInsets.zero,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        // crossAxisSpacing: 0,
-                        // mainAxisSpacing: 0,
-                        childAspectRatio: 1.5,
-                      ),
-                      itemCount: _savingsAccounts.length,
-                      itemBuilder: (context, index) {
-                        final account = _savingsAccounts[index];
+                    : GridView.count(
+                      crossAxisCount: 2,
+                      padding: const EdgeInsets.all(8.0),
+                      mainAxisSpacing: 2.0,
+                      crossAxisSpacing: 2.0,
+                      childAspectRatio: 1.6,
+                      children: _savingsAccounts.map<Widget>((account) {
                         return SavingsAccountWidget(
-                        account: account,
-                        onEdit: () => _editSavingsAccount(account),
-                        onDelete: () => _deleteSavingsAccount(account),
+                          account: account,
+                          onEdit: () => _editSavingsAccount(account),
+                          onDelete: () => _deleteSavingsAccount(account),
                         );
-                      },
-                      ),
+                      }).toList(),
                   ),
+                  )
                 ],
                 
               
