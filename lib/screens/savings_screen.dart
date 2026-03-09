@@ -6,7 +6,6 @@ import 'add_edit_savings_account_screen.dart';
 import '../widgets/savings_account_widget.dart';
 import 'settings_screen.dart';
 import 'statistics_screen.dart';
-import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
 
 class SavingsScreen extends StatefulWidget {
   final ValueNotifier<int>? navIndexNotifier;
@@ -25,31 +24,6 @@ class _SavingsScreenState extends State<SavingsScreen> {
   double _settingsUsdRate = 42.0;
   double _settingsEurRate = 51.0;
 
-  late List<DraggableGridItem> _items;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSavingsAccounts();
-    widget.navIndexNotifier?.addListener(_onNavIndexChanged);
-    
-    _items = List.generate(
-      6,
-      (index) => DraggableGridItem(
-        isDraggable: true,
-        child: Container(
-          color: Colors.primaries[index % Colors.primaries.length],
-          child: Center(
-            child: Text(
-              'Item $index',
-              style: const TextStyle(color: Colors.white, fontSize: 18),
-            ),
-          ),
-        ),
-      ),
-    );
-
-  }
 
   void _onNavIndexChanged() {
     if (widget.navIndexNotifier?.value == 2) {
