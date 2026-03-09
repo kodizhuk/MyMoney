@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/transaction.dart';
 import '../services/database_service.dart';
 import '../widgets/transaction_item.dart';
@@ -27,6 +28,34 @@ class _IncomeScreenState extends State<IncomeScreen> {
     'Freelance',
     'Investments',
   ];
+
+  // methods for the current view
+  DateTime _selectedDate = DateTime.now();
+  String _getDate(){
+    return DateFormat('MMMM yyyy').format(_selectedDate);
+
+  }
+  void _nextDate() {
+    _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1);
+    setState(() {});
+  }
+  void _previousDate() {
+    _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1);
+    setState(() {});
+  }
+
+  String _getTotal() {
+    double total = 0;
+    // for (final tx in _income) {
+    //   if (tx.date.year == _selectedDate.year && tx.date.month == _selectedDate.month) {
+    //     total += _toUAH(tx);
+    //   }
+    // }
+
+    var formatter = NumberFormat('#,##,000');
+    String numberTotal = formatter.format(total).trim().replaceAll(',', ' ') ;
+    return total > 0 ? '$numberTotal UAH' : '0 UAH';
+  }
 
 
   @override
@@ -240,24 +269,77 @@ class _IncomeScreenState extends State<IncomeScreen> {
           ),
         ],
       ),
-      
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _incomeTransactions.isEmpty
-          ? const Center(
-              child: Text('No income transactions yet'),
-            )
-          
-          : ListView.builder(
-              itemCount: _incomeTransactions.length,
-              itemBuilder: (context, index) {
-                return TransactionItem(
-                  transaction: _incomeTransactions[index],
-                  onDelete: () => _deleteTransaction(index),
-                  onEdit: () => _editTransaction(index),
-                );
-              },
-            ),
+
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _incomeTransactions.isEmpty
+                ? const Center(
+                    child: Text('No income transactions yet'),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Date selector row (fixed height)
+                      SizedBox(
+                        height: 50,  // Fixed height for buttons + padding
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            IconButton(
+                              icon: const Icon(Icons.arrow_left),
+                              iconSize: 48.0,
+                              tooltip: 'Previous Date',
+                              onPressed: _previousDate,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Text(
+                                _getDate(),
+                                style: const TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.arrow_right),
+                              iconSize: 48.0,
+                              tooltip: 'Next Date',
+                              onPressed: _nextDate,
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Transactions list (takes remaining space)
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _incomeTransactions.length,
+                          itemBuilder: (context, index) {
+                            return TransactionItem(
+                              transaction: _incomeTransactions[index],
+                              onDelete: () => _deleteTransaction(index),
+                              onEdit: () => _editTransaction(index),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+      ),
+
+
+          // : ListView.builder(
+          //     itemCount: _incomeTransactions.length,
+          //     itemBuilder: (context, index) {
+          //       return TransactionItem(
+          //         transaction: _incomeTransactions[index],
+          //         onDelete: () => _deleteTransaction(index),
+          //         onEdit: () => _editTransaction(index),
+          //       );
+          //     },
+          //   ),
 
       floatingActionButton: FloatingActionButton(
         onPressed: _addTransaction,
