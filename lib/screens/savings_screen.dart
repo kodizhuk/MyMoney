@@ -23,6 +23,13 @@ class _SavingsScreenState extends State<SavingsScreen> {
   String _selectedCurrency = 'All';
   double _settingsUsdRate = 42.0;
   double _settingsEurRate = 51.0;
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadSavingsAccounts();
+    widget.navIndexNotifier?.addListener(_onNavIndexChanged);
+  }
 
 
   void _onNavIndexChanged() {
@@ -172,9 +179,6 @@ class _SavingsScreenState extends State<SavingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    
-    final List<String> items;
-    items = List<String>.generate(20, (i) => 'Item ${i + 1}');
 
     return Scaffold(
       appBar: AppBar(
@@ -293,7 +297,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
                       )
                     : GridView.count(
                       crossAxisCount: 2,
-                      padding: const EdgeInsets.all(8.0),
+                      padding:  EdgeInsets.zero,
                       mainAxisSpacing: 2.0,
                       crossAxisSpacing: 2.0,
                       childAspectRatio: 1.6,
@@ -334,7 +338,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
         currencySymbol = r'$';
     }
     var formatter = NumberFormat('#,##,000');
-    String _numberTotal = formatter.format(_totalSavings).trim().replaceAll(',', ' ') ;
-    return _totalSavings > 0 ? '$_numberTotal $currencySymbol' : '0 $currencySymbol';
+    String numberTotal = formatter.format(_totalSavings).trim().replaceAll(',', ' ') ;
+    return _totalSavings > 0 ? '$numberTotal $currencySymbol' : '0 $currencySymbol';
   }
 }

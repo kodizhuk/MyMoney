@@ -83,7 +83,7 @@ class SavingsAccountWidget extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            // const SizedBox(height: 8),
             Text(
               currencyFormat.format(account.amount),
               style: const TextStyle(
@@ -93,7 +93,7 @@ class SavingsAccountWidget extends StatelessWidget {
               ),
             ),
             if (account.notes != null && account.notes!.isNotEmpty) ...[
-              const SizedBox(height: 8),
+              // const SizedBox(height: 8),
               Text(
                 '${account.notes}',
                 style: TextStyle(

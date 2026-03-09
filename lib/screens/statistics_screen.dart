@@ -64,8 +64,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
 
     var formatter = NumberFormat('#,##,000');
-    String _numberTotal = formatter.format(total).trim().replaceAll(',', ' ') ;
-    return total > 0 ? '$_numberTotal UAH' : '0 UAH';
+    String numberTotal = formatter.format(total).trim().replaceAll(',', ' ') ;
+    return total > 0 ? '$numberTotal UAH' : '0 UAH';
   }
 
   @override

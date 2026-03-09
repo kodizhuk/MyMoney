@@ -44,10 +44,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _saveRates() {
     if (!_formKey.currentState!.validate()) return;
     final currency = 'UAH';
-    final usd_rate = double.tryParse(_usdController.text) ?? 42.0;
-    DatabaseService().setExchangeRates(currency, usd_rate).then((_) {
+    final usdRate = double.tryParse(_usdController.text) ?? 42.0;
+    DatabaseService().setExchangeRates(currency, usdRate).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Saved rates — USD: $usd_rate')),
+        SnackBar(content: Text('Saved rates — USD: $usdRate')),
       );
     }).catchError((e) {
       ScaffoldMessenger.of(context).showSnackBar(
