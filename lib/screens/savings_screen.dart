@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/savings_account.dart';
 import '../services/database_service.dart';
 import 'add_edit_savings_account_screen.dart';
@@ -44,7 +45,6 @@ class _SavingsScreenState extends State<SavingsScreen> {
 
   Future<void> _loadSavingsAccounts() async {
     setState(() => _isLoading = true);
-    // TODO: filter by selected currnecy
     try {
       final savingsAccounts = await _dbService.getSavingsAccounts();
       final rates = await _dbService.getExchangeRates();
@@ -148,8 +148,6 @@ class _SavingsScreenState extends State<SavingsScreen> {
   double get _totalSavings {
     // Calculate total depends on the selected currency
     return _savingsAccounts.fold(0.0, (sum, account) {
-      double amount = 0.0;
-
       if (_selectedCurrency == 'UAH') {
         //count all the account money of the selected currency
         if (account.currency == 'UAH') {
@@ -170,22 +168,6 @@ class _SavingsScreenState extends State<SavingsScreen> {
         sum += account.amount;
         //print('curr $amount ${account.currency}');
       }
-
-      // if (account.currency == 'USD') {
-      //   amount = account.amount;
-      // } else if (account.currency == 'UAH') {
-      //   // Convert UAH -> USD using the account's stored USD rate (USD->UAH)
-      //   final rate = account.usdRate > 0 ? account.usdRate : _settingsUsdRate;
-      //   amount = rate > 0 ? (account.amount / rate) : 0.0;
-      // } else if (account.currency == 'EUR') {
-      //   // Convert EUR -> UAH using settings eur rate, then UAH -> USD using settings usd rate
-      //   final eurRate = _settingsEurRate > 0 ? _settingsEurRate : 1.0;
-      //   final usdRate = _settingsUsdRate > 0 ? _settingsUsdRate : 1.0;
-      //   amount = (account.amount * eurRate) / usdRate;
-      // } else {
-      //   // Fallback: treat as USD
-      //   amount = account.amount;
-      // }
 
       return sum;
     });
@@ -221,107 +203,116 @@ class _SavingsScreenState extends State<SavingsScreen> {
       ),
       // Buttons
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(8),
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ChoiceChip(
-                        label: Text('UAH'),
-                        selected: _selectedCurrency == 'UAH',
-                        onSelected: (_) => setState(() {
-                          _selectedCurrency = 'UAH';
-                          _loadSavingsAccounts();
-                        }),
-                      ),
-                      const SizedBox(width: 8),
-                      ChoiceChip(
-                        label: const Text('USD'),
-                        selected: _selectedCurrency == 'USD',
-                        onSelected: (_) => setState(() {
-                          _selectedCurrency = 'USD';
-                          _loadSavingsAccounts();
-                        }),
-                      ),
-                      const SizedBox(width: 8),
-                      ChoiceChip(
-                        label: const Text('EUR'),
-                        selected: _selectedCurrency == 'EUR',
-                        onSelected: (_) => setState(() {
-                          _selectedCurrency = 'EUR';
-                          _loadSavingsAccounts();
-                        }),
-                      ),
-                      const SizedBox(width: 8),
-                      ChoiceChip(
-                        label: const Text('All'),
-                        selected: _selectedCurrency == 'All',
-                        onSelected: (_) => setState(() {
-                          _selectedCurrency = 'All';
-                          _loadSavingsAccounts();
-                        }),
-                      ),
-                    ],
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ChoiceChip(
+                    label: Text('UAH'),
+                    selected: _selectedCurrency == 'UAH',
+                    onSelected: (_) => setState(() {
+                      _selectedCurrency = 'UAH';
+                      _loadSavingsAccounts();
+                    }),
+                    ),
+                    const SizedBox(width: 8),
+                    ChoiceChip(
+                    label: const Text('USD'),
+                    selected: _selectedCurrency == 'USD',
+                    onSelected: (_) => setState(() {
+                      _selectedCurrency = 'USD';
+                      _loadSavingsAccounts();
+                    }),
+                    ),
+                    const SizedBox(width: 8),
+                    ChoiceChip(
+                    label: const Text('EUR'),
+                    selected: _selectedCurrency == 'EUR',
+                    onSelected: (_) => setState(() {
+                      _selectedCurrency = 'EUR';
+                      _loadSavingsAccounts();
+                    }),
+                    ),
+                    const SizedBox(width: 8),
+                    ChoiceChip(
+                    label: const Text('All'),
+                    selected: _selectedCurrency == 'All',
+                    onSelected: (_) => setState(() {
+                      _selectedCurrency = 'All';
+                      _loadSavingsAccounts();
+                    }),
+                    ),
+                  ],
                   ),
                   Container(
-                    padding: const EdgeInsets.all(16),
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Total Savings: ${_formatTotalSavings()}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                  padding: EdgeInsets.zero,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Total Savings: ${_formatTotalSavings()}',
+                    style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                     ),
                   ),
+                  ),
                   Expanded(
-                    child: _savingsAccounts.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.account_balance_wallet,
-                                  size: 80,
-                                  color: Colors.grey[400],
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'No savings accounts yet',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Tap + to add your first savings account',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[500],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: _savingsAccounts.length,
-                            itemBuilder: (context, index) {
-                              final account = _savingsAccounts[index];
-                              return SavingsAccountWidget(
-                                account: account,
-                                onEdit: () => _editSavingsAccount(account),
-                                onDelete: () => _deleteSavingsAccount(account),
-                              );
-                            },
+                  child: _savingsAccounts.isEmpty
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                        Icon(
+                          Icons.account_balance_wallet,
+                          size: 80,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No savings accounts yet',
+                          style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey[600],
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tap + to add your first savings account',
+                          style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[500],
+                          ),
+                        ),
+                        ],
+                      ),
+                      )
+                    : GridView.builder(
+                      padding: EdgeInsets.zero,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        // crossAxisSpacing: 0,
+                        // mainAxisSpacing: 0,
+                        childAspectRatio: 1.5,
+                      ),
+                      itemCount: _savingsAccounts.length,
+                      itemBuilder: (context, index) {
+                        final account = _savingsAccounts[index];
+                        return SavingsAccountWidget(
+                        account: account,
+                        onEdit: () => _editSavingsAccount(account),
+                        onDelete: () => _deleteSavingsAccount(account),
+                        );
+                      },
+                      ),
                   ),
                 ],
+                
+              
               ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -346,6 +337,8 @@ class _SavingsScreenState extends State<SavingsScreen> {
       default:
         currencySymbol = r'$';
     }
-    return '$currencySymbol ${_totalSavings.toStringAsFixed(2)}';
+    var formatter = NumberFormat('#,##,000');
+    String _numberTotal = formatter.format(_totalSavings).trim().replaceAll(',', ' ') ;
+    return _totalSavings > 0 ? '$_numberTotal $currencySymbol' : '0 $currencySymbol';
   }
 }
