@@ -37,10 +37,12 @@ class _IncomeScreenState extends State<IncomeScreen> {
   }
   void _nextDate() {
     _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1);
+    _loadTransactions(); // Reload transactions for the new month
     setState(() {});
   }
   void _previousDate() {
     _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1);
+    _loadTransactions(); // Reload transactions for the new month
     setState(() {});
   }
 
@@ -84,7 +86,10 @@ class _IncomeScreenState extends State<IncomeScreen> {
       final expenses = await _dbService.getTransactions('expense');
       final rates = await _dbService.getExchangeRates();
       setState(() {
-        _incomeTransactions = transactions;
+        //filter transactions for the selected month
+        _incomeTransactions = transactions.where((tx) {
+          return tx.date.year == _selectedDate.year && tx.date.month == _selectedDate.month;
+        }).toList();
         _expenseTransactions = expenses;
         _settingsUsdRate = rates['usd'] ?? _settingsUsdRate;
         _settingsEurRate = rates['eur'] ?? _settingsEurRate;
@@ -108,8 +113,6 @@ class _IncomeScreenState extends State<IncomeScreen> {
           ),
       ),
     );
-
-
 
     if (result != null) {
       try {
@@ -190,15 +193,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
       if (tx.currency == 'UAH') {
         return sum + tx.amount;
       }
-      // double amt = tx.amount;
-      // if (tx.currency == 'USD') {
-      //   final rate = 42.0; // Fixed rate for USD to UAH conversion
-      //   amt = tx.amount * rate;
-      // } else if (tx.currency == 'EUR') {
-      //   final eurRate = _settingsEurRate > 0 ? _settingsEurRate : 1.0;
-      //   amt = tx.amount * eurRate;
-      // }
-      // return sum + amt;
+
       return sum;
     });
 
@@ -274,72 +269,60 @@ class _IncomeScreenState extends State<IncomeScreen> {
         padding: const EdgeInsets.all(8.0),
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _incomeTransactions.isEmpty
-                ? const Center(
-                    child: Text('No income transactions yet'),
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Date selector row (fixed height)
-                      SizedBox(
-                        height: 50,  // Fixed height for buttons + padding
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            IconButton(
-                              icon: const Icon(Icons.arrow_left),
-                              iconSize: 48.0,
-                              tooltip: 'Previous Date',
-                              onPressed: _previousDate,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Text(
-                                _getDate(),
-                                style: const TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.arrow_right),
-                              iconSize: 48.0,
-                              tooltip: 'Next Date',
-                              onPressed: _nextDate,
-                            ),
-                          ],
+            : Column(
+              children: [
+                // Date selector row (fixed height)
+                SizedBox(
+                  height: 50,  // Fixed height for buttons + padding
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      IconButton(
+                        icon: const Icon(Icons.arrow_left),
+                        iconSize: 48.0,
+                        tooltip: 'Previous Date',
+                        onPressed: _previousDate,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          _getDate(),
+                          style: const TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      // Transactions list (takes remaining space)
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _incomeTransactions.length,
-                          itemBuilder: (context, index) {
-                            return TransactionItem(
-                              transaction: _incomeTransactions[index],
-                              onDelete: () => _deleteTransaction(index),
-                              onEdit: () => _editTransaction(index),
-                            );
-                          },
-                        ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_right),
+                        iconSize: 48.0,
+                        tooltip: 'Next Date',
+                        onPressed: _nextDate,
                       ),
                     ],
                   ),
+                ),
+                // Income transactions list (takes remaining space)
+                _incomeTransactions.isEmpty
+                ? const Text(
+                  'No income transactions yet',
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                )
+                :Expanded(
+                  child: ListView.builder(
+                    itemCount: _incomeTransactions.length,
+                    itemBuilder: (context, index) {
+                      return TransactionItem(
+                        transaction: _incomeTransactions[index],
+                        onDelete: () => _deleteTransaction(index),
+                        onEdit: () => _editTransaction(index),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            )
       ),
-
-
-          // : ListView.builder(
-          //     itemCount: _incomeTransactions.length,
-          //     itemBuilder: (context, index) {
-          //       return TransactionItem(
-          //         transaction: _incomeTransactions[index],
-          //         onDelete: () => _deleteTransaction(index),
-          //         onEdit: () => _editTransaction(index),
-          //       );
-          //     },
-          //   ),
 
       floatingActionButton: FloatingActionButton(
         onPressed: _addTransaction,
