@@ -262,7 +262,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               titlesData: FlTitlesData(
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
-                                    showTitles: false,
+                                    showTitles: true,
                                     reservedSize: 50,
                                     interval: 1,
                                     getTitlesWidget: (value, meta) {
@@ -284,7 +284,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                         ).format(DateTime.parse(label));
                                       } else if (_range == TimeRange.year) {
                                         display = DateFormat(
-                                          'MMM yyyy',
+                                          'MMM',
                                         ).format(DateTime.parse('$label-01'));
                                       } else {
                                         display = label;
@@ -304,7 +304,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                 ),
                                 leftTitles: AxisTitles(
                                   sideTitles: SideTitles(
-                                    showTitles: true,
+                                    showTitles: false,
                                     reservedSize: 50,
                                     interval: interval,
                                   ),
@@ -354,7 +354,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                     ),
                                   ],
 
-                                  // showingTooltipIndicators: [0],
+                                  showingTooltipIndicators: [0],
                                 );
                               }).toList(),
                             ),
