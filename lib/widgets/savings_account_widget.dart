@@ -30,87 +30,55 @@ class SavingsAccountWidget extends StatelessWidget {
     }
     final currencyFormat = NumberFormat.currency(symbol: symbol);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return GestureDetector(
+      onTap: onEdit,  // ← Tap anywhere → Edit
+      onLongPress: onDelete,  // ← Long press → Delete (replaces menu)
+      child: InkWell(  // ← Ripple effect on tap
+        borderRadius: BorderRadius.circular(12),  // Match Card radius
+        child: Card(
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          shape: RoundedRectangleBorder(  // Rounded corners
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    account.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      onEdit();
-                    } else if (value == 'delete') {
-                      onDelete();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit),
-                          SizedBox(width: 8),
-                          Text('Edit'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete),
-                          SizedBox(width: 8),
-                          Text('Delete'),
-                        ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        account.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
-                  icon: const Icon(Icons.more_vert),
+                ),
+                Text(
+                  currencyFormat.format(account.amount),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+                if (account.notes != null && account.notes!.isNotEmpty)
+                  Text(
+                    '${account.notes}',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                Text(
+                  'Updated: ${DateFormat.yMMMd().format(account.lastUpdated)}',
+                  style: TextStyle(color: Colors.grey[500]),
                 ),
               ],
             ),
-            // const SizedBox(height: 8),
-            Text(
-              currencyFormat.format(account.amount),
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.green,
-              ),
-            ),
-            if (account.notes != null && account.notes!.isNotEmpty) ...[
-              // const SizedBox(height: 8),
-              Text(
-                '${account.notes}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-
-            ],
-            Text(
-                'Updated: ${DateFormat.yMMMd().format(account.lastUpdated)}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[500],
-                ),
-              )
-          ],
+          ),
         ),
       ),
     );
