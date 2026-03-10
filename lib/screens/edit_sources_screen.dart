@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/database_service.dart';
+import 'dart:math';
 
 class EditSourcesScreen extends StatefulWidget {
   const EditSourcesScreen({super.key});
@@ -38,7 +39,19 @@ class _EditSourcesScreenState extends State<EditSourcesScreen> {
     final name = _newSourceController.text.trim();
     if (name.isEmpty) return;
     try {
-      await _db.insertSource('income', name, Colors.green.value.toRadixString(16));
+      Random _random = Random();
+      // Hue: Full rainbow (0-360)
+      // Saturation: 70-100% (vibrant)
+      // Lightness: 50-80% (bright, not pastel)
+      Color randomColor =   Color.fromARGB(
+                            255,                           // Full opacity
+                            150 + _random.nextInt(100),    // R: 150-255 (bright)
+                            150 + _random.nextInt(100),    // G: 150-255
+                            150 + _random.nextInt(100),    // B: 150-255
+                          );
+
+      
+      await _db.insertSource('income', name, randomColor.value.toRadixString(16));
       _newSourceController.clear();
       _loadSources();
     } catch (e) {

@@ -153,7 +153,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       for (final tx in _income) {
         final key = DateFormat('yyyy-MM-dd').format(tx.date);
 
-        Color _color = _categories.firstWhere(
+        Color color = _categories.firstWhere(
           (c) => c.containsKey(tx.source),
           orElse: () => {'': Colors.green},
         )[tx.source] ?? Colors.green;
@@ -163,7 +163,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             date: map[key]!.date,
             amount: map[key]!.amount + _toUAH(tx),
             category: map[key]!.category,
-            color: _color,
+            color: color,
           );
         }
       }
@@ -185,7 +185,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         if (tx.date.year == _selectedDate.year) {
           final key = DateFormat('yyyy-MM').format(tx.date);
 
-          Color _color = _categories.firstWhere(
+          Color color = _categories.firstWhere(
             (c) => c.containsKey(tx.source),
             orElse: () => {'': Colors.green},
           )[tx.source] ?? Colors.green;
@@ -195,7 +195,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               date: map[key]!.date,
               amount: map[key]!.amount + _toUAH(tx),
               category: map[key]!.category,
-              color: _color,
+              color: color,
             );
           }
         }
