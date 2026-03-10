@@ -226,7 +226,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.edit),
-                  title: const Text('Edit Sources'),
+                  title: const Text('Income Sources'),
                   subtitle: const Text('Manage income sources and categories'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
@@ -236,7 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.category),
-                  title: const Text('Edit Categories'),
+                  title: const Text('Expance Categories'),
                   subtitle: const Text('Manage expense categories'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {

@@ -38,7 +38,7 @@ class _EditCategoriesScreenState extends State<EditCategoriesScreen> {
     final name = _newController.text.trim();
     if (name.isEmpty) return;
     try {
-      await _db.insertSource('expense', name);
+      await _db.insertSource('expense', name, Colors.green.value.toRadixString(16));
       _newController.clear();
       _loadCategories();
     } catch (e) {

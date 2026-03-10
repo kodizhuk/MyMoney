@@ -38,7 +38,7 @@ class _EditSourcesScreenState extends State<EditSourcesScreen> {
     final name = _newSourceController.text.trim();
     if (name.isEmpty) return;
     try {
-      await _db.insertSource('income', name);
+      await _db.insertSource('income', name, Colors.green.value.toRadixString(16));
       _newSourceController.clear();
       _loadSources();
     } catch (e) {
@@ -79,7 +79,7 @@ class _EditSourcesScreenState extends State<EditSourcesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Sources'),
+        title: const Text('Income Sources'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -111,7 +111,7 @@ class _EditSourcesScreenState extends State<EditSourcesScreen> {
                             return ListTile(
                               title: Text(s['name'] ?? ''),
                               trailing: IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
+                                icon: const Icon(Icons.delete, color: Color(0xFFF44336)),
                                 onPressed: () => _deleteSource(s['id'] as int, s['name'] as String),
                               ),
                             );

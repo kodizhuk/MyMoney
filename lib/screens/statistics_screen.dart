@@ -8,6 +8,21 @@ import '../models/transaction.dart' as model;
 //Buttons to select time range for graphs
 enum TimeRange { month, year }
 
+class IncomeEntry {
+  final DateTime date;
+  final double amount;      // Amount
+  final String category;    // "Salary", "Freelance", etc.
+  final Color color;        // Category color
+
+  IncomeEntry({
+    required this.date,
+    required this.amount,
+    required this.category,
+    required this.color,
+  });
+}
+
+
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
@@ -18,6 +33,7 @@ class StatisticsScreen extends StatefulWidget {
 class _StatisticsScreenState extends State<StatisticsScreen> {
   final DatabaseService _db = DatabaseService();
   List<model.Transaction> _income = [];
+  List<Map<String, Color>> _categories = [];
   bool _isLoading = true;
   TimeRange _range = TimeRange.month;
   double _usdRate = 42.0;
@@ -79,8 +95,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     try {
       final tx = await _db.getTransactions('income');
       final rates = await _db.getExchangeRates();
+      final categories = await _db.getSources('income');
       setState(() {
         _income = tx;
+        _categories = categories.map((c) => {c['name'] as String: Color(int.parse(c['color'] as String, radix: 16))}).toList();
         _usdRate = rates['usd'] ?? _usdRate;
         _eurRate = rates['eur'] ?? _eurRate;
         _isLoading = false;
@@ -105,12 +123,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   // Returns list of (label, value) pairs ordered by time
-  List<MapEntry<String, double>> _aggregate() {
-    // final _selectedDate = DateTime.now();
-
+  Map<String, IncomeEntry> _aggregate() {
     if (_range == TimeRange.month) {
       // get the numbers of days to display based on current month
-      //final int daysInMonth = getDaysInMonth(now.year, now.month);
       final daysInMonth = DateTime(
         _selectedDate.year,
         _selectedDate.month + 1,
@@ -123,53 +138,102 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         (i) => DateTime(_selectedDate.year, _selectedDate.month, i + 1),
       );
 
-      final map = <String, double>{};
+      final map = <String, IncomeEntry>{};
       // go through all days
       for (final d in days) {
-        map[DateFormat('yyyy-MM-dd').format(d)] = 0.0;
+        map[DateFormat('yyyy-MM-dd').format(d)] = IncomeEntry(
+          date: d,
+          amount: 0.0,
+          category: '',
+          color: Colors.transparent,
+        );
       }
 
       // go through all income
       for (final tx in _income) {
         final key = DateFormat('yyyy-MM-dd').format(tx.date);
+
+        Color _color = _categories.firstWhere(
+          (c) => c.containsKey(tx.source),
+          orElse: () => {'': Colors.green},
+        )[tx.source] ?? Colors.green;
+
         if (map.containsKey(key)) {
-          map[key] = map[key]! + _toUAH(tx);
+          map[key] = IncomeEntry(
+            date: map[key]!.date,
+            amount: map[key]!.amount + _toUAH(tx),
+            category: map[key]!.category,
+            color: _color,
+          );
         }
       }
-      return map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+      return map;
 
     } else if (_range == TimeRange.year) {
       // Current year months grouped by month
       final months = List.generate(12, (i) => DateTime(_selectedDate.year, i + 1, 1));
-      final map = <String, double>{};
+      final map = <String, IncomeEntry>{};
       for (final m in months) {
-        map[DateFormat('yyyy-MM').format(m)] = 0.0;
+        map[DateFormat('yyyy-MM').format(m)] = IncomeEntry(
+          date: m,
+          amount: 0.0 ,
+          category: '',
+          color: Colors.transparent,
+        );
       }
       for (final tx in _income) {
         if (tx.date.year == _selectedDate.year) {
           final key = DateFormat('yyyy-MM').format(tx.date);
-          if (map.containsKey(key)) map[key] = map[key]! + _toUAH(tx);
+
+          Color _color = _categories.firstWhere(
+            (c) => c.containsKey(tx.source),
+            orElse: () => {'': Colors.green},
+          )[tx.source] ?? Colors.green;
+
+          if (map.containsKey(key)) {
+            map[key] = IncomeEntry(
+              date: map[key]!.date,
+              amount: map[key]!.amount + _toUAH(tx),
+              category: map[key]!.category,
+              color: _color,
+            );
+          }
         }
       }
-      return map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
-
+      return map;
     } else {
       // All time grouped by year
-      final map = <String, double>{};
+      final map = <String, IncomeEntry>{};
       for (final tx in _income) {
         final key = tx.date.year.toString();
-        map[key] = (map[key] ?? 0.0) + _toUAH(tx);
+        map[key] = (map[key] ?? IncomeEntry(
+          date: DateTime.parse(key),
+          amount: 0.0,
+          category: '',
+          color: Colors.transparent,
+        ));
       }
-      return map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+      return map;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final data = _aggregate();
+    // final data = _aggregate();
+    // final data = _aggregate();
+    final data = _aggregate().entries
+      .map((e) => MapEntry(e.key, e.value.amount))
+      .toList();
+    
+    final colors = _aggregate().entries
+      .map((e) => e.value.color)
+      .toList();
+
     final spots = <FlSpot>[];
+    List<Color> spotColors = []; 
     for (var i = 0; i < data.length; i++) {
       spots.add(FlSpot(i.toDouble(), data[i].value));
+      spotColors.add(colors[i]); // Use category color or transparent for zero values
     }
 
     double maxY = 0;
@@ -337,6 +401,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               ),
                               barGroups: spots.asMap().entries.map((entry) {
                                 final spot = entry.value;
+                                final index = entry.key;
                                 if (spot.y == 0) {
                                   // Show empty bar for zero values to keep spacing, but make it invisible
                                   return BarChartGroupData(x: entry.key, barRods: []);  // Empty bars
@@ -346,7 +411,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   barRods: [
                                     BarChartRodData(
                                       toY: spot.y,
-                                      color: Colors.green,
+                                      color: spotColors[index],
                                       width: 20,
                                       borderRadius: const BorderRadius.vertical(
                                         top: Radius.circular(4),

@@ -43,6 +43,7 @@ class SourcesFields {
   static const String id = 'id';
   static const String type = 'type';
   static const String name = 'name';
+  static const String color = 'color';
 }
 
 class DatabaseService {
@@ -114,7 +115,8 @@ class DatabaseService {
       CREATE TABLE sources (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         type TEXT NOT NULL,
-        name TEXT NOT NULL
+        name TEXT NOT NULL,
+        color TEXT NOT NULL
       )
     ''');
   }
@@ -153,7 +155,8 @@ class DatabaseService {
         CREATE TABLE sources (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           type TEXT NOT NULL,
-          name TEXT NOT NULL
+          name TEXT NOT NULL,
+          color TEXT NOT NULL
         )
       ''');
     }
@@ -355,7 +358,8 @@ Future<Map<String, dynamic>> getExchangeRates() async {
           CREATE TABLE IF NOT EXISTS sources (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             type TEXT NOT NULL,
-            name TEXT NOT NULL
+            name TEXT NOT NULL,
+            color TEXT NOT NULL
           )
         ''');
       } catch (_) {}
@@ -363,17 +367,18 @@ Future<Map<String, dynamic>> getExchangeRates() async {
     }
   }
 
-  Future<int> insertSource(String type, String name) async {
+  Future<int> insertSource(String type, String name, String color) async {
     Database db = await database;
     try {
-      return await db.insert(SourcesFields.tableName, {SourcesFields.type: type, SourcesFields.name: name});
+      return await db.insert(SourcesFields.tableName, {SourcesFields.type: type, SourcesFields.name: name, SourcesFields.color: color});
     } catch (e) {
       try {
         await db.execute('''
           CREATE TABLE IF NOT EXISTS sources (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             type TEXT NOT NULL,
-            name TEXT NOT NULL
+            name TEXT NOT NULL,
+            color TEXT NOT NULL
           )
         ''');
         return await db.insert(SourcesFields.tableName, {SourcesFields.type: type, SourcesFields.name: name});
