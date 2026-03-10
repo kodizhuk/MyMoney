@@ -28,7 +28,7 @@ class SavingsAccountWidget extends StatelessWidget {
       default:
         symbol = '₴';
     }
-    final currencyFormat = NumberFormat.currency(symbol: symbol);
+    final currencyFormat = NumberFormat.currency(symbol: symbol, decimalDigits: 0);
 
     return GestureDetector(
       onTap: onEdit,  // ← Tap anywhere → Edit
@@ -73,7 +73,7 @@ class SavingsAccountWidget extends StatelessWidget {
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 Text(
-                  DateFormat.yMMMd().format(account.lastUpdated),
+                  '${DateFormat.yMMMd().format(account.lastUpdated)}',
                   style: TextStyle(color: Colors.grey[500]),
                 ),
               ],
