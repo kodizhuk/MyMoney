@@ -65,23 +65,24 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     setState(() {});
   }
 
-  String _getTotal() {
+  String _getTotal(currency) {
     double total = 0;
     for (final tx in _income) {
       if (_range == TimeRange.month) {
         if (tx.date.year == _selectedDate.year && tx.date.month == _selectedDate.month) {
-          total += _toUAH(tx);
+          currency == 'UAH' ? total += _toUAH(tx) : total += tx.amount_usd;
         }
       } else {
         if (tx.date.year == _selectedDate.year) {
-          total += _toUAH(tx);
+          // total += _toUAH(tx);
+          currency == 'UAH' ? total += _toUAH(tx) : total += tx.amount_usd;
         }
       }
     }
 
     var formatter = NumberFormat('#,##,000');
     String numberTotal = formatter.format(total).trim().replaceAll(',', ' ') ;
-    return total > 0 ? '$numberTotal UAH' : '0 UAH';
+    return '$numberTotal ' + '$currency';
   }
 
   @override
@@ -307,7 +308,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   ),
                   
                   Text(
-                    'Income Total: ${_getTotal()}',
+                    'Income Total: ${_getTotal('UAH')} (${_getTotal('USD')})',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
