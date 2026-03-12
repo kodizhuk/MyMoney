@@ -77,50 +77,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    const Expanded(child: Text('USD rate')),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 120,
-                      child: TextFormField(
-                        controller: _usdController,
-                        decoration: const InputDecoration(hintText: '42', contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8)),
-                        textAlign: TextAlign.right,
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Enter USD rate';
-                          if (double.tryParse(v) == null) return 'Enter a valid number';
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Expanded(child: Text('EUR rate')),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 120,
-                      child: TextFormField(
-                        controller: _eurController,
-                        decoration: const InputDecoration(hintText: '51', contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8)),
-                        textAlign: TextAlign.right,
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Enter EUR rate';
-                          if (double.tryParse(v) == null) return 'Enter a valid number';
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(onPressed: _saveRates, child: const Text('Save')),
-                const Divider(height: 32),
+                // Row(
+                //   children: [
+                //     const Expanded(child: Text('USD rate')),
+                //     const SizedBox(width: 12),
+                //     SizedBox(
+                //       width: 120,
+                //       child: TextFormField(
+                //         controller: _usdController,
+                //         decoration: const InputDecoration(hintText: '42', contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8)),
+                //         textAlign: TextAlign.right,
+                //         keyboardType: TextInputType.numberWithOptions(decimal: true),
+                //         validator: (v) {
+                //           if (v == null || v.isEmpty) return 'Enter USD rate';
+                //           if (double.tryParse(v) == null) return 'Enter a valid number';
+                //           return null;
+                //         },
+                //       ),
+                //     ),
+                //   ],
+                // ),
+                // const SizedBox(height: 12),
+                // Row(
+                //   children: [
+                //     const Expanded(child: Text('EUR rate')),
+                //     const SizedBox(width: 12),
+                //     SizedBox(
+                //       width: 120,
+                //       child: TextFormField(
+                //         controller: _eurController,
+                //         decoration: const InputDecoration(hintText: '51', contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8)),
+                //         textAlign: TextAlign.right,
+                //         keyboardType: TextInputType.numberWithOptions(decimal: true),
+                //         validator: (v) {
+                //           if (v == null || v.isEmpty) return 'Enter EUR rate';
+                //           if (double.tryParse(v) == null) return 'Enter a valid number';
+                //           return null;
+                //         },
+                //       ),
+                //     ),
+                //   ],
+                // ),
+                // const SizedBox(height: 24),
+                // ElevatedButton(onPressed: _saveRates, child: const Text('Save')),
+                // const Divider(height: 32),
                 ListTile(
                   leading: const Icon(Icons.language),
                   title: const Text('Language'),
@@ -134,60 +134,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(),
                 ListTile(
-                  leading: const Icon(Icons.new_releases),
-                  title: const Text('What\'s New'),
-                  subtitle: const Text('Version 1.0.0'),
+                  leading: const Icon(Icons.palette),
+                  title: const Text('Theme'),
+                  subtitle: const Text('Light'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('What\'s New'),
-                        content: const SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('Version 1.0.0', style: TextStyle(fontWeight: FontWeight.bold)),
-                              SizedBox(height: 8),
-                              Text('• Income and expense tracking'),
-                              Text('• Multi-currency support (USD, UAH, EUR)'),
-                              Text('• Savings accounts management'),
-                              Text('• Tithe calculation'),
-                              Text('• Swipe to delete transactions'),
-                            ],
-                          ),
-                        ),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
-                        ],
-                      ),
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Theme settings coming soon!')),
                     );
                   },
                 ),
                 const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.info),
-                  title: const Text('About'),
-                  subtitle: const Text('Money Tracker v0.0.1'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    showAboutDialog(
-                      context: context,
-                      applicationName: 'Money Tracker',
-                      applicationVersion: '0.0.1',
-                      applicationLegalese: '© 2026 Money Tracker App',
-                      children: [
-                        const SizedBox(height: 16),
-                        const Text(
-                          'A comprehensive money tracking application for managing income, expenses, and savings by kodizhuk',
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const Divider(),
+                
+                // const Divider(),
                 // ListTile(
                 //   leading: const Icon(Icons.download),
                 //   title: const Text('Export database'),
@@ -223,7 +182,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 //     }
                 //   },
                 // ),
-                const Divider(),
                 ListTile(
                   leading: const Icon(Icons.edit),
                   title: const Text('Income Sources'),
@@ -235,7 +193,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(),
                 ListTile(
-                  leading: const Icon(Icons.category),
+                  leading: const Icon(Icons.edit),
                   title: const Text('Expance Categories'),
                   subtitle: const Text('Manage expense categories'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -243,6 +201,59 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const EditCategoriesScreen()));
                   },
                 ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.info),
+                  title: const Text('About'),
+                  subtitle: const Text('Money Tracker v0.0.1'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    showAboutDialog(
+                      context: context,
+                      applicationName: 'Money Tracker',
+                      applicationVersion: '0.0.1',
+                      applicationLegalese: '© 2026 Money Tracker App',
+                      children: [
+                        const SizedBox(height: 16),
+                        const Text(
+                          '\tIncomeTracker is a financial tracker that simplifies managing your income, expenses, and long-term savings in one place.\n \tIt features detailed visual statistics to break down earnings by category and includes a built-in calculator to automatically determine your church tithe.\n \t No AD, no tracking, all data are saved in local database on your device.',
+                          textAlign: TextAlign.left,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.new_releases),
+                  title: const Text('What\'s New'),
+                  subtitle: const Text('Version 0.0.1'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('What\'s New'),
+                        content: const SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('Version 1.0.0', style: TextStyle(fontWeight: FontWeight.bold)),
+                              SizedBox(height: 8),
+                              Text('• TBD'),
+                              Text('• TBD'),
+                            ],
+                          ),
+                        ),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                
               ],
             ),
           ),
