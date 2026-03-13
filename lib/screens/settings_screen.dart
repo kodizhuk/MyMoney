@@ -146,28 +146,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(),
                 
-                // const Divider(),
-                // ListTile(
-                //   leading: const Icon(Icons.download),
-                //   title: const Text('Export database'),
-                //   subtitle: const Text('Save a copy of the app database to Downloads'),
-                //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                //   onTap: () async {
-                //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Exporting database...')));
-                //     try {
-                //       final path = await DatabaseService().exportDatabase();
-                //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Database exported to $path')));
-                //     } catch (e) {
-                //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error exporting database: $e')));
-                //     }
-                //   },
-                // ),
-                // const Divider(),
-                // ListTile(
-                //   leading: const Icon(Icons.upload_file),
-                //   title: const Text('Import database'),
-                //   subtitle: const Text('Replace current database with a saved DB file'),
-                //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                ListTile(
+                  leading: const Icon(Icons.download),
+                  title: const Text('Export Income to CSV'),
+                  subtitle: const Text('Export all income transactions to a CSV file'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () async {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Exporting database...')));
+                    try {
+                      // final path = await DatabaseService().exportDatabase();
+                      final path = await DatabaseService().exportIncomeToCsv();
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Database exported to $path')));
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error exporting database: $e')));
+                    }
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.upload),
+                  title: const Text('Import Income from CSV'),
+                  subtitle: const Text('Import income transactions from a CSV file'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 //   onTap: () async {
                 //     try {
                 //       final result = await FilePicker.platform.pickFiles(allowMultiple: false, type: FileType.custom, allowedExtensions: ['db', 'sqlite']);
@@ -181,7 +181,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error importing database: $e')));
                 //     }
                 //   },
-                // ),
+                ),
                 ListTile(
                   leading: const Icon(Icons.edit),
                   title: const Text('Income Sources'),

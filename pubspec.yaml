@@ -41,6 +41,10 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.2
   fl_chart: ^1.1.1
+  #csv file import/export
+  csv: ^6.0.0
+  file_picker: ^8.0.0     # works on mobile + desktop[web:197][web:198][web:204]
+
 
   # Date formatting
   intl: 0.20.2

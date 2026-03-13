@@ -3,8 +3,10 @@ import '../models/savings_account.dart';
 
 import 'dart:async';
 import 'dart:io';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:csv/csv.dart';
+import 'package:sqflite/sqflite.dart';
 import 'dart:io' as io;
 
 class TransactionsFields {
@@ -71,7 +73,7 @@ class DatabaseService {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'money_tracker.db');
+    String path = p.join(await getDatabasesPath(), 'money_tracker.db');
     return await openDatabase(
       path,
       version: 5,
@@ -282,7 +284,7 @@ Future<Map<String, dynamic>> getExchangeRates() async {
 
   /// Exports the database file to the user's Downloads folder and returns the new path.
   Future<String> exportDatabase() async {
-    final dbPath = join(await getDatabasesPath(), 'money_tracker.db');
+    final dbPath = p.join(await getDatabasesPath(), 'money_tracker.db');
     final src = io.File(dbPath);
     if (!await src.exists()) {
       throw Exception('Database file not found at $dbPath');
@@ -292,16 +294,46 @@ Future<Map<String, dynamic>> getExchangeRates() async {
     String home = io.Platform.isWindows
         ? (io.Platform.environment['USERPROFILE'] ?? '.')
         : (io.Platform.environment['HOME'] ?? '.');
-    final downloadsDir = join(home, 'Downloads');
+    final downloadsDir = p.join(home, 'Downloads');
     try {
       await io.Directory(downloadsDir).create(recursive: true);
     } catch (_) {}
 
     final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final destPath = join(downloadsDir, 'money_tracker_$timestamp.db');
+    final destPath = p.join(downloadsDir, 'money_tracker_$timestamp.db');
 
     await src.copy(destPath);
     return destPath;
+  }
+
+  Future<String> exportIncomeToCsv() async {
+    // 1) Read all rows
+    // final rows = await db.query('income');  // List<Map<String, Object?>>
+    final rows = await _database!.query('transactions', where: '${TransactionsFields.type} = ?', whereArgs: ['income']);
+
+    if (rows.isEmpty) return '';
+
+    // 2) Build header + data
+    final headers = rows.first.keys.toList();
+    final data = <List<dynamic>>[
+      headers,
+      ...rows.map((row) => headers.map((h) => row[h]).toList()),
+    ];
+
+    // 3) Convert to CSV string
+    final csvString = const ListToCsvConverter().convert(data);
+
+    // 4) Choose output path (example: user home dir)
+    final dbPath = await getDatabasesPath();
+    final baseDir = Directory(dbPath).parent.parent.path; // go up; adjust if needed
+    final filePath = p.join(baseDir, 'income_export.csv');
+
+    final file = File(filePath);
+    await file.writeAsString(csvString);
+
+    // Show path somewhere in UI or log
+    print('Exported to $filePath');
+    return filePath;
   }
 
   /// Close the open database connection if any.
@@ -323,7 +355,7 @@ Future<Map<String, dynamic>> getExchangeRates() async {
     // Close existing DB connection so file can be replaced
     await closeDatabase();
 
-    final dbPath = join(await getDatabasesPath(), 'money_tracker.db');
+    final dbPath = p.join(await getDatabasesPath(), 'money_tracker.db');
     final destFile = io.File(dbPath);
 
     // Ensure parent directory exists
