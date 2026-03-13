@@ -1,3 +1,5 @@
+import 'package:path_provider/path_provider.dart';
+
 import '../models/transaction.dart' as model;
 import '../models/savings_account.dart';
 
@@ -8,6 +10,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:csv/csv.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io' as io;
+import 'package:share_plus/share_plus.dart'; // Add this import
+import 'package:cross_file/cross_file.dart';
 
 class TransactionsFields {
   static const String tableName = 'transactions';
@@ -139,8 +143,12 @@ class DatabaseService {
 
     if (oldVersion < 3) {
       // Add currency column to transactions and savings_accounts for version 3
-      await db.execute('ALTER TABLE ${TransactionsFields.tableName} ADD COLUMN ${TransactionsFields.currency} TEXT NOT NULL DEFAULT "UAH"');
-      await db.execute('ALTER TABLE ${SavingsAccountsFields.tableName} ADD COLUMN ${SavingsAccountsFields.currency} TEXT NOT NULL DEFAULT "UAH"');
+      await db.execute(
+        'ALTER TABLE ${TransactionsFields.tableName} ADD COLUMN ${TransactionsFields.currency} TEXT NOT NULL DEFAULT "UAH"',
+      );
+      await db.execute(
+        'ALTER TABLE ${SavingsAccountsFields.tableName} ADD COLUMN ${SavingsAccountsFields.currency} TEXT NOT NULL DEFAULT "UAH"',
+      );
       oldVersion = 3;
     }
 
@@ -165,27 +173,29 @@ class DatabaseService {
   }
 
   // Settings operations
-Future<Map<String, dynamic>> getExchangeRates() async {
-  final db = await database;
-  try {
-    final rows = await db.query(SettingsFields.tableName, limit: 1);
-    if (rows.isNotEmpty) {
-      final row = rows.first;
-      return {
-        'currency': row[SettingsFields.currency] as String,
-        'usd_rate': (row[SettingsFields.usdRate] as num).toDouble(),
-      };
-    }
-  } catch (_) {}
-  return {'currency': 'UAH', 'usd_rate': 43.0};
-}
-
+  Future<Map<String, dynamic>> getExchangeRates() async {
+    final db = await database;
+    try {
+      final rows = await db.query(SettingsFields.tableName, limit: 1);
+      if (rows.isNotEmpty) {
+        final row = rows.first;
+        return {
+          'currency': row[SettingsFields.currency] as String,
+          'usd_rate': (row[SettingsFields.usdRate] as num).toDouble(),
+        };
+      }
+    } catch (_) {}
+    return {'currency': 'UAH', 'usd_rate': 43.0};
+  }
 
   Future<void> setExchangeRates(String currency, double usdRate) async {
     Database db = await database;
     try {
       final rows = await db.query(SettingsFields.tableName, limit: 1);
-      final data = {SettingsFields.currency: currency, SettingsFields.usdRate: usdRate};
+      final data = {
+        SettingsFields.currency: currency,
+        SettingsFields.usdRate: usdRate,
+      };
       if (rows.isNotEmpty) {
         await db.update(SettingsFields.tableName, data);
       } else {
@@ -200,7 +210,6 @@ Future<Map<String, dynamic>> getExchangeRates() async {
   Future<int> insertTransaction(model.Transaction transaction) async {
     Database db = await database;
     return await db.insert(TransactionsFields.tableName, transaction.toMap());
-
   }
 
   Future<List<model.Transaction>> getTransactions(String type) async {
@@ -211,7 +220,10 @@ Future<Map<String, dynamic>> getExchangeRates() async {
       whereArgs: [type],
       orderBy: '${TransactionsFields.date} DESC',
     );
-    return List.generate(maps.length, (i) => model.Transaction.fromMap(maps[i]));
+    return List.generate(
+      maps.length,
+      (i) => model.Transaction.fromMap(maps[i]),
+    );
   }
 
   Future<int> updateTransaction(model.Transaction transaction) async {
@@ -245,12 +257,17 @@ Future<Map<String, dynamic>> getExchangeRates() async {
   // Savings Account CRUD operations
   Future<int> insertSavingsAccount(SavingsAccount savingsAccount) async {
     Database db = await database;
-    return await db.insert(SavingsAccountsFields.tableName, savingsAccount.toMap());
+    return await db.insert(
+      SavingsAccountsFields.tableName,
+      savingsAccount.toMap(),
+    );
   }
 
   Future<List<SavingsAccount>> getSavingsAccounts() async {
     Database db = await database;
-    List<Map<String, dynamic>> maps = await db.query(SavingsAccountsFields.tableName);
+    List<Map<String, dynamic>> maps = await db.query(
+      SavingsAccountsFields.tableName,
+    );
     return List.generate(maps.length, (i) => SavingsAccount.fromMap(maps[i]));
   }
 
@@ -262,7 +279,6 @@ Future<Map<String, dynamic>> getExchangeRates() async {
       where: '${SavingsAccountsFields.id} = ?',
       whereArgs: [savingsAccount.id],
     );
-
   }
 
   Future<int> deleteSavingsAccount(int id) async {
@@ -308,8 +324,11 @@ Future<Map<String, dynamic>> getExchangeRates() async {
 
   Future<String> exportIncomeToCsv() async {
     // 1) Read all rows
-    // final rows = await db.query('income');  // List<Map<String, Object?>>
-    final rows = await _database!.query('transactions', where: '${TransactionsFields.type} = ?', whereArgs: ['income']);
+    final rows = await _database!.query(
+      'transactions',
+      where: '${TransactionsFields.type} = ?',
+      whereArgs: ['income'],
+    );
 
     if (rows.isEmpty) return '';
 
@@ -323,16 +342,24 @@ Future<Map<String, dynamic>> getExchangeRates() async {
     // 3) Convert to CSV string
     final csvString = const ListToCsvConverter().convert(data);
 
-    // 4) Choose output path (example: user home dir)
-    final dbPath = await getDatabasesPath();
-    final baseDir = Directory(dbPath).parent.parent.path; // go up; adjust if needed
-    final filePath = p.join(baseDir, 'income_export.csv');
+    // 4) Use app documents directory (persistent, private to app, no permissions needed)
+    final directory = await getApplicationDocumentsDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final filePath = '${directory.path}/income_export_$timestamp.csv';
 
     final file = File(filePath);
     await file.writeAsString(csvString);
 
-    // Show path somewhere in UI or log
-    print('Exported to $filePath');
+    // 5) Share the file (user can save to Downloads)
+    final XFile csvFile = XFile(
+      filePath,
+      name: 'income_export_$timestamp.csv',
+    ); // name helps
+    await Share.shareXFiles([
+      csvFile,
+    ], text: 'Your income transactions CSV export');
+
+    print('Exported & shared from $filePath');
     return filePath;
   }
 
@@ -350,7 +377,8 @@ Future<Map<String, dynamic>> getExchangeRates() async {
   /// Returns the destination path where the DB was written.
   Future<String> importDatabase(String sourcePath) async {
     final srcFile = io.File(sourcePath);
-    if (!await srcFile.exists()) throw Exception('Source file not found: $sourcePath');
+    if (!await srcFile.exists())
+      throw Exception('Source file not found: $sourcePath');
 
     // Close existing DB connection so file can be replaced
     await closeDatabase();
@@ -380,8 +408,12 @@ Future<Map<String, dynamic>> getExchangeRates() async {
   Future<List<Map<String, dynamic>>> getSources(String type) async {
     Database db = await database;
     try {
-      final rows = await db.query(SourcesFields.tableName,
-          where: '${SourcesFields.type} = ?', whereArgs: [type], orderBy: '${SourcesFields.name} ASC');
+      final rows = await db.query(
+        SourcesFields.tableName,
+        where: '${SourcesFields.type} = ?',
+        whereArgs: [type],
+        orderBy: '${SourcesFields.name} ASC',
+      );
       return rows;
     } catch (e) {
       // Table might not exist; attempt to create and return empty
@@ -402,7 +434,11 @@ Future<Map<String, dynamic>> getExchangeRates() async {
   Future<int> insertSource(String type, String name, String color) async {
     Database db = await database;
     try {
-      return await db.insert(SourcesFields.tableName, {SourcesFields.type: type, SourcesFields.name: name, SourcesFields.color: color});
+      return await db.insert(SourcesFields.tableName, {
+        SourcesFields.type: type,
+        SourcesFields.name: name,
+        SourcesFields.color: color,
+      });
     } catch (e) {
       try {
         await db.execute('''
@@ -413,7 +449,10 @@ Future<Map<String, dynamic>> getExchangeRates() async {
             color TEXT NOT NULL
           )
         ''');
-        return await db.insert(SourcesFields.tableName, {SourcesFields.type: type, SourcesFields.name: name});
+        return await db.insert(SourcesFields.tableName, {
+          SourcesFields.type: type,
+          SourcesFields.name: name,
+        });
       } catch (e2) {
         rethrow;
       }
@@ -422,6 +461,10 @@ Future<Map<String, dynamic>> getExchangeRates() async {
 
   Future<int> deleteSource(int id) async {
     Database db = await database;
-    return await db.delete(SourcesFields.tableName, where: '${SourcesFields.id} = ?', whereArgs: [id]);
+    return await db.delete(
+      SourcesFields.tableName,
+      where: '${SourcesFields.id} = ?',
+      whereArgs: [id],
+    );
   }
 }

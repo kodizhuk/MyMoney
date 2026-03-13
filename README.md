@@ -46,7 +46,12 @@ IncomeTracker is a financial tracker that simplifies managing your income, expen
 2. **Install / Run**:
     - **Linux**  
       ```bash
-        TODO
+        flutter run
+
+        # run in Android emulator
+        emulator -list-avds
+        emulator -avd Pixel_8
+        flutter run
       ```
     - **Windows**  
       ```bash

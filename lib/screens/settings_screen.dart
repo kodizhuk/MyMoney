@@ -13,8 +13,12 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usdController = TextEditingController(text: '42');
-  final TextEditingController _eurController = TextEditingController(text: '51');
+  final TextEditingController _usdController = TextEditingController(
+    text: '42',
+  );
+  final TextEditingController _eurController = TextEditingController(
+    text: '51',
+  );
 
   @override
   void dispose() {
@@ -33,8 +37,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final rates = await DatabaseService().getExchangeRates();
       setState(() {
-        _usdController.text = rates['usd']!.toString().replaceAll(RegExp(r'\.0+\$'), '');
-        _eurController.text = rates['eur']!.toString().replaceAll(RegExp(r'\.0+\$'), '');
+        _usdController.text = rates['usd']!.toString().replaceAll(
+          RegExp(r'\.0+\$'),
+          '',
+        );
+        _eurController.text = rates['eur']!.toString().replaceAll(
+          RegExp(r'\.0+\$'),
+          '',
+        );
       });
     } catch (e) {
       // leave defaults
@@ -45,15 +55,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!_formKey.currentState!.validate()) return;
     final currency = 'UAH';
     final usdRate = double.tryParse(_usdController.text) ?? 42.0;
-    DatabaseService().setExchangeRates(currency, usdRate).then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Saved rates — USD: $usdRate')),
-      );
-    }).catchError((e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving rates: $e')),
-      );
-    });
+    DatabaseService()
+        .setExchangeRates(currency, usdRate)
+        .then((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Saved rates — USD: $usdRate')),
+          );
+        })
+        .catchError((e) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error saving rates: $e')));
+        });
   }
 
   @override
@@ -128,7 +141,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Language settings coming soon!')),
+                      const SnackBar(
+                        content: Text('Language settings coming soon!'),
+                      ),
                     );
                   },
                 ),
@@ -140,25 +155,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Theme settings coming soon!')),
+                      const SnackBar(
+                        content: Text('Theme settings coming soon!'),
+                      ),
                     );
                   },
                 ),
                 const Divider(),
-                
+
                 ListTile(
                   leading: const Icon(Icons.download),
-                  title: const Text('Export Income to CSV'),
-                  subtitle: const Text('Export all income transactions to a CSV file'),
+                  title: const Text('Export Income'),
+                  subtitle: const Text(
+                    'Export all income transactions to a CSV file',
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () async {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Exporting database...')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Exporting database...')),
+                    );
                     try {
                       // final path = await DatabaseService().exportDatabase();
                       final path = await DatabaseService().exportIncomeToCsv();
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Database exported to $path')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Database exported to $path')),
+                      );
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error exporting database: $e')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error exporting database: $e')),
+                      );
                     }
                   },
                 ),
@@ -166,21 +191,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.upload),
                   title: const Text('Import Income from CSV'),
-                  subtitle: const Text('Import income transactions from a CSV file'),
+                  subtitle: const Text(
+                    'Import income transactions from a CSV file',
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                //   onTap: () async {
-                //     try {
-                //       final result = await FilePicker.platform.pickFiles(allowMultiple: false, type: FileType.custom, allowedExtensions: ['db', 'sqlite']);
-                //       if (result == null || result.files.isEmpty) return;
-                //       final path = result.files.single.path;
-                //       if (path == null) return;
-                //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing database...')));
-                //       final dest = await DatabaseService().importDatabase(path);
-                //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Database imported to $dest')));
-                //     } catch (e) {
-                //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error importing database: $e')));
-                //     }
-                //   },
+                  //   onTap: () async {
+                  //     try {
+                  //       final result = await FilePicker.platform.pickFiles(allowMultiple: false, type: FileType.custom, allowedExtensions: ['db', 'sqlite']);
+                  //       if (result == null || result.files.isEmpty) return;
+                  //       final path = result.files.single.path;
+                  //       if (path == null) return;
+                  //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing database...')));
+                  //       final dest = await DatabaseService().importDatabase(path);
+                  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Database imported to $dest')));
+                  //     } catch (e) {
+                  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error importing database: $e')));
+                  //     }
+                  //   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.edit),
@@ -188,7 +215,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: const Text('Manage income sources and categories'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const EditSourcesScreen()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EditSourcesScreen(),
+                      ),
+                    );
                   },
                 ),
                 const Divider(),
@@ -198,7 +230,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: const Text('Manage expense categories'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const EditCategoriesScreen()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EditCategoriesScreen(),
+                      ),
+                    );
                   },
                 ),
                 const Divider(),
@@ -239,7 +276,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('Version 1.0.0', style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text(
+                                'Version 1.0.0',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                               SizedBox(height: 8),
                               Text('• TBD'),
                               Text('• TBD'),
@@ -247,13 +287,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                         actions: [
-                          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close'),
+                          ),
                         ],
                       ),
                     );
                   },
                 ),
-                
               ],
             ),
           ),
