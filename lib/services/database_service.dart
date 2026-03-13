@@ -351,13 +351,18 @@ class DatabaseService {
     await file.writeAsString(csvString);
 
     // 5) Share the file (user can save to Downloads)
-    final XFile csvFile = XFile(
-      filePath,
-      name: 'income_export_$timestamp.csv',
-    ); // name helps
-    await Share.shareXFiles([
-      csvFile,
-    ], text: 'Your income transactions CSV export');
+    if (!Platform.isLinux) {
+      final XFile csvFile = XFile(
+        filePath,
+        name: 'income_export_$timestamp.csv',
+      );
+      await Share.shareXFiles([
+        csvFile,
+      ], text: 'Your income transactions CSV export');
+    } else {
+      // Linux fallback: just print/copy path (or open with xdg-open if you add logic)
+      print('On Linux: CSV saved to $filePath - copy path or use file manager');
+    }
 
     print('Exported & shared from $filePath');
     return filePath;
