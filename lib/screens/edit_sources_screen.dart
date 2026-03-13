@@ -39,15 +39,15 @@ class _EditSourcesScreenState extends State<EditSourcesScreen> {
     final name = _newSourceController.text.trim();
     if (name.isEmpty) return;
     try {
-      Random _random = Random();
+      Random random = Random();
       // Hue: Full rainbow (0-360)
       // Saturation: 70-100% (vibrant)
       // Lightness: 50-80% (bright, not pastel)
       Color randomColor =   Color.fromARGB(
                             255,                           // Full opacity
-                            150 + _random.nextInt(100),    // R: 150-255 (bright)
-                            150 + _random.nextInt(100),    // G: 150-255
-                            150 + _random.nextInt(100),    // B: 150-255
+                            150 + random.nextInt(100),    // R: 150-255 (bright)
+                            150 + random.nextInt(100),    // G: 150-255
+                            150 + random.nextInt(100),    // B: 150-255
                           );
 
       

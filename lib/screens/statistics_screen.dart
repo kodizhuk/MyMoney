@@ -82,7 +82,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     var formatter = NumberFormat('#,##,000');
     String numberTotal = formatter.format(total).trim().replaceAll(',', ' ') ;
-    return '$numberTotal ' + '$currency';
+    return '$numberTotal ' '$currency';
   }
 
   @override

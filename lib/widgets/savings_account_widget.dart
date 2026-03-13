@@ -73,7 +73,7 @@ class SavingsAccountWidget extends StatelessWidget {
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 Text(
-                  '${DateFormat.yMMMd().format(account.lastUpdated)}',
+                  DateFormat.yMMMd().format(account.lastUpdated),
                   style: TextStyle(color: Colors.grey[500]),
                 ),
               ],

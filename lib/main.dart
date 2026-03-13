@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'screens/income_screen.dart';
 import 'screens/expenses_screen.dart';
 import 'screens/savings_screen.dart';
-import 'themes.dart';
 
 void main() {
   runApp(const MyApp());

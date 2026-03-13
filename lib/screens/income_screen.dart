@@ -18,6 +18,7 @@ class IncomeScreen extends StatefulWidget {
 class _IncomeScreenState extends State<IncomeScreen> {
   final DatabaseService _dbService = DatabaseService();
   List<Transaction> _incomeTransactions = [];
+  List<Transaction> _allIncomeTransactions = [];
   List<Transaction> _expenseTransactions = [];
   bool _isLoading = true;
   double _settingsUsdRate = 42.0;
@@ -90,6 +91,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
         _incomeTransactions = transactions.where((tx) {
           return tx.date.year == _selectedDate.year && tx.date.month == _selectedDate.month;
         }).toList();
+        _allIncomeTransactions = transactions;
         _expenseTransactions = expenses;
         _settingsUsdRate = rates['usd'] ?? _settingsUsdRate;
         _settingsEurRate = rates['eur'] ?? _settingsEurRate;
@@ -188,7 +190,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
 
   String _calculateTithe() {
     // Convert all income to UAH
-    double totalIncomeUAH = _incomeTransactions.fold(0.0, (sum, tx) {
+    double totalIncomeUAH = _allIncomeTransactions.fold(0.0, (sum, tx) {
       // TODO: calculates only in UAH, need to add currency conversion for USD and EUR
       if (tx.currency == 'UAH') {
         return sum + tx.amount;
