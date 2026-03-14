@@ -165,10 +165,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 ListTile(
                   leading: const Icon(Icons.download),
-                  title: const Text('Export Income'),
-                  subtitle: const Text(
-                    'Export all income transactions to a CSV file',
-                  ),
+                  title: const Text('Export All'),
+                  subtitle: const Text('to CSV file'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () async {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -176,7 +174,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                     try {
                       // final path = await DatabaseService().exportDatabase();
-                      final path = await DatabaseService().exportIncomeToCsv();
+                      final path = await DatabaseService().exportDBToCsv();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Database exported to $path')),
                       );

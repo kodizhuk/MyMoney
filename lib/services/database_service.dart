@@ -8,10 +8,8 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:csv/csv.dart';
-import 'package:sqflite/sqflite.dart';
 import 'dart:io' as io;
 import 'package:share_plus/share_plus.dart'; // Add this import
-import 'package:cross_file/cross_file.dart';
 
 class TransactionsFields {
   static const String tableName = 'transactions';
@@ -135,20 +133,42 @@ class DatabaseService {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT NOT NULL,
           amount REAL NOT NULL,
-          notes TEXT
+          amount_usd REAL NOT NULL,
+          notes TEXT,
+          currency TEXT NOT NULL DEFAULT 'UAH',
+          last_updated TEXT
         )
       ''');
       oldVersion = 2;
     }
 
     if (oldVersion < 3) {
-      // Add currency column to transactions and savings_accounts for version 3
-      await db.execute(
-        'ALTER TABLE ${TransactionsFields.tableName} ADD COLUMN ${TransactionsFields.currency} TEXT NOT NULL DEFAULT "UAH"',
-      );
-      await db.execute(
-        'ALTER TABLE ${SavingsAccountsFields.tableName} ADD COLUMN ${SavingsAccountsFields.currency} TEXT NOT NULL DEFAULT "UAH"',
-      );
+      // Add columns needed for version 3
+      // If columns already exist, ignore errors.
+      try {
+        await db.execute(
+          'ALTER TABLE ${TransactionsFields.tableName} ADD COLUMN ${TransactionsFields.currency} TEXT NOT NULL DEFAULT "UAH"',
+        );
+      } catch (_) {}
+
+      try {
+        await db.execute(
+          'ALTER TABLE ${SavingsAccountsFields.tableName} ADD COLUMN ${SavingsAccountsFields.currency} TEXT NOT NULL DEFAULT "UAH"',
+        );
+      } catch (_) {}
+
+      try {
+        await db.execute(
+          'ALTER TABLE ${SavingsAccountsFields.tableName} ADD COLUMN amount_usd REAL NOT NULL DEFAULT 0',
+        );
+      } catch (_) {}
+
+      try {
+        await db.execute(
+          "ALTER TABLE ${SavingsAccountsFields.tableName} ADD COLUMN last_updated TEXT NOT NULL DEFAULT '1970-01-01T00:00:00.000'",
+        );
+      } catch (_) {}
+
       oldVersion = 3;
     }
 
@@ -322,49 +342,93 @@ class DatabaseService {
     return destPath;
   }
 
-  Future<String> exportIncomeToCsv() async {
-    // 1) Read all rows
-    final rows = await _database!.query(
-      'transactions',
-      where: '${TransactionsFields.type} = ?',
-      whereArgs: ['income'],
-    );
+  Future<String> exportDBToCsv() async {
+    // 1) Query all transactions (income and expenses)
+    final transactionRows = await _database!.query('transactions');
 
-    if (rows.isEmpty) return '';
+    // 2) Query savings accounts
+    final savingsRows = await _database!.query('savings_accounts');
 
-    // 2) Build header + data
-    final headers = rows.first.keys.toList();
-    final data = <List<dynamic>>[
-      headers,
-      ...rows.map((row) => headers.map((h) => row[h]).toList()),
+    if (transactionRows.isEmpty && savingsRows.isEmpty) return '';
+
+    // 3) Define common headers for the CSV
+    final headers = [
+      'type', // 'income', 'expense', or 'savings'
+      'id',
+      'date', // For transactions: date; for savings: last_updated
+      'name',
+      'amount',
+      'amount_usd',
+      'source', // For transactions: source; for savings: empty
+      'currency',
+      'notes', // For transactions: empty; for savings: notes
     ];
 
-    // 3) Convert to CSV string
+    // 4) Map transaction rows to common format
+    final mappedTransactions = transactionRows
+        .map(
+          (row) => [
+            row[TransactionsFields.type] ?? '',
+            row[TransactionsFields.id] ?? '',
+            row[TransactionsFields.date] ?? '',
+            row[TransactionsFields.name] ?? '',
+            row[TransactionsFields.amount] ?? '',
+            row[TransactionsFields.amountUsd] ?? '',
+            row[TransactionsFields.source] ?? '',
+            row[TransactionsFields.currency] ?? '',
+            '', // Notes (empty for transactions)
+          ],
+        )
+        .toList();
+
+    // 5) Map savings rows to common format
+    final mappedSavings = savingsRows
+        .map(
+          (row) => [
+            'savings',
+            row[SavingsAccountsFields.id] ?? '',
+            row[SavingsAccountsFields.lastUpdated] ?? '',
+            row[SavingsAccountsFields.name] ?? '',
+            row[SavingsAccountsFields.amount] ?? '',
+            row[SavingsAccountsFields.amountUsd] ?? '',
+            '', // Source (empty for savings)
+            row[SavingsAccountsFields.currency] ?? '',
+            row[SavingsAccountsFields.notes] ?? '',
+          ],
+        )
+        .toList();
+
+    // 6) Combine data
+    final data = <List<dynamic>>[
+      headers,
+      ...mappedTransactions,
+      ...mappedSavings,
+    ];
+
+    // 7) Convert to CSV string
     final csvString = const ListToCsvConverter().convert(data);
 
-    // 4) Use app documents directory (persistent, private to app, no permissions needed)
+    // 8) Save to app documents directory
     final directory = await getApplicationDocumentsDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final filePath = '${directory.path}/income_export_$timestamp.csv';
+    final filePath = '${directory.path}/all_data_export_$timestamp.csv';
 
     final file = File(filePath);
     await file.writeAsString(csvString);
 
-    // 5) Share the file (user can save to Downloads)
+    // 9) Share the file (user can save to Downloads)
     if (!Platform.isLinux) {
       final XFile csvFile = XFile(
         filePath,
-        name: 'income_export_$timestamp.csv',
+        name: 'all_data_export_$timestamp.csv',
       );
       await Share.shareXFiles([
         csvFile,
-      ], text: 'Your income transactions CSV export');
+      ], text: 'Your income, expenses, and savings CSV export');
     } else {
-      // Linux fallback: just print/copy path (or open with xdg-open if you add logic)
-      print('On Linux: CSV saved to $filePath - copy path or use file manager');
+      // Linux fallback: print path
     }
 
-    print('Exported & shared from $filePath');
     return filePath;
   }
 
@@ -382,8 +446,9 @@ class DatabaseService {
   /// Returns the destination path where the DB was written.
   Future<String> importDatabase(String sourcePath) async {
     final srcFile = io.File(sourcePath);
-    if (!await srcFile.exists())
+    if (!await srcFile.exists()) {
       throw Exception('Source file not found: $sourcePath');
+    }
 
     // Close existing DB connection so file can be replaced
     await closeDatabase();

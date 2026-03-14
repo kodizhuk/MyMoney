@@ -23,14 +23,13 @@ class _SavingsScreenState extends State<SavingsScreen> {
   String _selectedCurrency = 'All';
   double _settingsUsdRate = 42.0;
   double _settingsEurRate = 51.0;
-  
+
   @override
   void initState() {
     super.initState();
     _loadSavingsAccounts();
     widget.navIndexNotifier?.addListener(_onNavIndexChanged);
   }
-
 
   void _onNavIndexChanged() {
     if (widget.navIndexNotifier?.value == 2) {
@@ -172,14 +171,10 @@ class _SavingsScreenState extends State<SavingsScreen> {
 
       return sum;
     });
-  }  
-
-
-
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Savings'),
@@ -214,105 +209,104 @@ class _SavingsScreenState extends State<SavingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ChoiceChip(
-                    label: Text('UAH'),
-                    selected: _selectedCurrency == 'UAH',
-                    onSelected: (_) => setState(() {
-                      _selectedCurrency = 'UAH';
-                      _loadSavingsAccounts();
-                    }),
-                    ),
-                    const SizedBox(width: 8),
-                    ChoiceChip(
-                    label: const Text('USD'),
-                    selected: _selectedCurrency == 'USD',
-                    onSelected: (_) => setState(() {
-                      _selectedCurrency = 'USD';
-                      _loadSavingsAccounts();
-                    }),
-                    ),
-                    const SizedBox(width: 8),
-                    ChoiceChip(
-                    label: const Text('EUR'),
-                    selected: _selectedCurrency == 'EUR',
-                    onSelected: (_) => setState(() {
-                      _selectedCurrency = 'EUR';
-                      _loadSavingsAccounts();
-                    }),
-                    ),
-                    const SizedBox(width: 8),
-                    ChoiceChip(
-                    label: const Text('All'),
-                    selected: _selectedCurrency == 'All',
-                    onSelected: (_) => setState(() {
-                      _selectedCurrency = 'All';
-                      _loadSavingsAccounts();
-                    }),
-                    ),
-                  ],
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ChoiceChip(
+                        label: Text('UAH'),
+                        selected: _selectedCurrency == 'UAH',
+                        onSelected: (_) => setState(() {
+                          _selectedCurrency = 'UAH';
+                          _loadSavingsAccounts();
+                        }),
+                      ),
+                      const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: const Text('USD'),
+                        selected: _selectedCurrency == 'USD',
+                        onSelected: (_) => setState(() {
+                          _selectedCurrency = 'USD';
+                          _loadSavingsAccounts();
+                        }),
+                      ),
+                      const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: const Text('EUR'),
+                        selected: _selectedCurrency == 'EUR',
+                        onSelected: (_) => setState(() {
+                          _selectedCurrency = 'EUR';
+                          _loadSavingsAccounts();
+                        }),
+                      ),
+                      const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: const Text('All'),
+                        selected: _selectedCurrency == 'All',
+                        onSelected: (_) => setState(() {
+                          _selectedCurrency = 'All';
+                          _loadSavingsAccounts();
+                        }),
+                      ),
+                    ],
                   ),
                   Container(
-                  padding: const EdgeInsets.all(8),
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Total Savings: ${_formatTotalSavings()}',
-                    style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    padding: const EdgeInsets.all(8),
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Total Savings: ${_formatTotalSavings()}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
-                  ),
-                  Expanded(
-                  child: _savingsAccounts.isEmpty
-                    ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                        Icon(
-                          Icons.account_balance_wallet,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No savings accounts yet',
-                          style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.grey[600],
+                  SizedBox(
+                    height: 150, // Set a fixed height for the GridView
+                    child: _savingsAccounts.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.account_balance_wallet,
+                                  size: 80,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No savings accounts yet',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Tap + to add your first savings account',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : GridView.count(
+                            crossAxisCount: 2,
+                            padding: EdgeInsets.zero,
+                            mainAxisSpacing: 2.0,
+                            crossAxisSpacing: 2.0,
+                            childAspectRatio: 1.6,
+                            children: _savingsAccounts.map<Widget>((account) {
+                              return SavingsAccountWidget(
+                                account: account,
+                                onEdit: () => _editSavingsAccount(account),
+                                onDelete: () => _deleteSavingsAccount(account),
+                              );
+                            }).toList(),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Tap + to add your first savings account',
-                          style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                          ),
-                        ),
-                        ],
-                      ),
-                      )
-                    : GridView.count(
-                      crossAxisCount: 2,
-                      padding:  EdgeInsets.zero,
-                      mainAxisSpacing: 2.0,
-                      crossAxisSpacing: 2.0,
-                      childAspectRatio: 1.6,
-                      children: _savingsAccounts.map<Widget>((account) {
-                        return SavingsAccountWidget(
-                          account: account,
-                          onEdit: () => _editSavingsAccount(account),
-                          onDelete: () => _deleteSavingsAccount(account),
-                        );
-                      }).toList(),
                   ),
-                  )
                 ],
-                
-              
               ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -338,7 +332,12 @@ class _SavingsScreenState extends State<SavingsScreen> {
         currencySymbol = r'$';
     }
     var formatter = NumberFormat('#,##,000');
-    String numberTotal = formatter.format(_totalSavings).trim().replaceAll(',', ' ') ;
-    return _totalSavings > 0 ? '$numberTotal $currencySymbol' : '0 $currencySymbol';
+    String numberTotal = formatter
+        .format(_totalSavings)
+        .trim()
+        .replaceAll(',', ' ');
+    return _totalSavings > 0
+        ? '$numberTotal $currencySymbol'
+        : '0 $currencySymbol';
   }
 }
