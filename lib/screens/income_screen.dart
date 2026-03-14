@@ -23,6 +23,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
   bool _isLoading = true;
   double _settingsUsdRate = 42.0;
   double _settingsEurRate = 51.0;
+  bool _showAllTime = false;
 
   final List<String> incomeCategoriesDefault = [
     'Salary',
@@ -32,15 +33,18 @@ class _IncomeScreenState extends State<IncomeScreen> {
 
   // methods for the current view
   DateTime _selectedDate = DateTime.now();
-  String _getDate(){
-    return DateFormat('MMMM yyyy').format(_selectedDate);
-
+  String _getDate() {
+    return _showAllTime
+        ? 'All Time'
+        : DateFormat('MMMM yyyy').format(_selectedDate);
   }
+
   void _nextDate() {
     _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1);
     _loadTransactions(); // Reload transactions for the new month
     setState(() {});
   }
+
   void _previousDate() {
     _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1);
     _loadTransactions(); // Reload transactions for the new month
@@ -56,10 +60,9 @@ class _IncomeScreenState extends State<IncomeScreen> {
     // }
 
     var formatter = NumberFormat('#,##,000');
-    String numberTotal = formatter.format(total).trim().replaceAll(',', ' ') ;
+    String numberTotal = formatter.format(total).trim().replaceAll(',', ' ');
     return total > 0 ? '$numberTotal UAH' : '0 UAH';
   }
-
 
   @override
   void initState() {
@@ -87,10 +90,15 @@ class _IncomeScreenState extends State<IncomeScreen> {
       final expenses = await _dbService.getTransactions('expense');
       final rates = await _dbService.getExchangeRates();
       setState(() {
-        //filter transactions for the selected month
-        _incomeTransactions = transactions.where((tx) {
-          return tx.date.year == _selectedDate.year && tx.date.month == _selectedDate.month;
-        }).toList();
+        //filter transactions for the selected month or show all
+        if (_showAllTime) {
+          _incomeTransactions = transactions;
+        } else {
+          _incomeTransactions = transactions.where((tx) {
+            return tx.date.year == _selectedDate.year &&
+                tx.date.month == _selectedDate.month;
+          }).toList();
+        }
         _allIncomeTransactions = transactions;
         _expenseTransactions = expenses;
         _settingsUsdRate = rates['usd'] ?? _settingsUsdRate;
@@ -99,9 +107,9 @@ class _IncomeScreenState extends State<IncomeScreen> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading transactions: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error loading transactions: $e')));
     }
   }
 
@@ -111,8 +119,8 @@ class _IncomeScreenState extends State<IncomeScreen> {
       MaterialPageRoute(
         builder: (context) => AddTransactionScreen(
           type: 'income',
-          defaultCategories: incomeCategoriesDefault,  
-          ),
+          defaultCategories: incomeCategoriesDefault,
+        ),
       ),
     );
 
@@ -121,9 +129,9 @@ class _IncomeScreenState extends State<IncomeScreen> {
         await _dbService.insertTransaction(result);
         _loadTransactions(); // Reload to get the updated list with IDs
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving transaction: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving transaction: $e')));
       }
     }
   }
@@ -149,7 +157,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
       MaterialPageRoute(
         builder: (context) => AddTransactionScreen(
           type: 'income',
-          defaultCategories: incomeCategoriesDefault, 
+          defaultCategories: incomeCategoriesDefault,
           existingTransaction: transaction,
         ),
       ),
@@ -168,8 +176,12 @@ class _IncomeScreenState extends State<IncomeScreen> {
   }
 
   double get _totalIncome {
-    return _incomeTransactions.fold(0, (sum, transaction) => sum + transaction.amount);
+    return _incomeTransactions.fold(
+      0,
+      (sum, transaction) => sum + transaction.amount,
+    );
   }
+
   String _formatTotal() {
     String symbol = '₴';
     if (_incomeTransactions.isNotEmpty) {
@@ -251,7 +263,9 @@ class _IncomeScreenState extends State<IncomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const StatisticsScreen(),
+                ),
               );
             },
           ),
@@ -272,58 +286,70 @@ class _IncomeScreenState extends State<IncomeScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : Column(
-              children: [
-                // Date selector row (fixed height)
-                SizedBox(
-                  height: 50,  // Fixed height for buttons + padding
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.arrow_left),
-                        iconSize: 48.0,
-                        tooltip: 'Previous Date',
-                        onPressed: _previousDate,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          _getDate(),
-                          style: const TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
+                children: [
+                  // Date selector row (fixed height)
+                  SizedBox(
+                    height: 50, // Fixed height for buttons + padding
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        IconButton(
+                          icon: const Icon(Icons.arrow_left),
+                          iconSize: 48.0,
+                          tooltip: 'Previous Date',
+                          onPressed: _showAllTime ? null : _previousDate,
+                        ),
+
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _showAllTime = !_showAllTime;
+                              _loadTransactions();
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                            ),
+                            child: Text(
+                              _getDate(),
+                              style: const TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_right),
-                        iconSize: 48.0,
-                        tooltip: 'Next Date',
-                        onPressed: _nextDate,
-                      ),
-                    ],
+
+                        IconButton(
+                          icon: const Icon(Icons.arrow_right),
+                          iconSize: 48.0,
+                          tooltip: 'Next Date',
+                          onPressed: _showAllTime ? null : _nextDate,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                // Income transactions list (takes remaining space)
-                _incomeTransactions.isEmpty
-                ? const Text(
-                  'No income transactions yet',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                )
-                :Expanded(
-                  child: ListView.builder(
-                    itemCount: _incomeTransactions.length,
-                    itemBuilder: (context, index) {
-                      return TransactionItem(
-                        transaction: _incomeTransactions[index],
-                        onDelete: () => _deleteTransaction(index),
-                        onEdit: () => _editTransaction(index),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            )
+                  // Income transactions list (takes remaining space)
+                  _incomeTransactions.isEmpty
+                      ? const Text(
+                          'No income transactions yet',
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        )
+                      : Expanded(
+                          child: ListView.builder(
+                            itemCount: _incomeTransactions.length,
+                            itemBuilder: (context, index) {
+                              return TransactionItem(
+                                transaction: _incomeTransactions[index],
+                                onDelete: () => _deleteTransaction(index),
+                                onEdit: () => _editTransaction(index),
+                              );
+                            },
+                          ),
+                        ),
+                ],
+              ),
       ),
 
       floatingActionButton: FloatingActionButton(
