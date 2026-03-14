@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/database_service.dart';
-// import 'package:file_picker/file_picker.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 import 'edit_sources_screen.dart';
 import 'edit_categories_screen.dart';
 
@@ -188,25 +189,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.upload),
-                  title: const Text('Import Income from CSV'),
-                  subtitle: const Text(
-                    'Import income transactions from a CSV file',
-                  ),
+                  title: const Text('Import All'),
+                  subtitle: const Text('from CSV file'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  //   onTap: () async {
-                  //     try {
-                  //       final result = await FilePicker.platform.pickFiles(allowMultiple: false, type: FileType.custom, allowedExtensions: ['db', 'sqlite']);
-                  //       if (result == null || result.files.isEmpty) return;
-                  //       final path = result.files.single.path;
-                  //       if (path == null) return;
-                  //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Importing database...')));
-                  //       final dest = await DatabaseService().importDatabase(path);
-                  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Database imported to $dest')));
-                  //     } catch (e) {
-                  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error importing database: $e')));
-                  //     }
-                  //   },
+                  onTap: () async {
+                    try {
+                      final result = await FilePicker.platform.pickFiles(
+                        allowMultiple: false,
+                        type: FileType.custom,
+                        allowedExtensions: ['csv'],
+                      );
+                      if (result == null || result.files.isEmpty) return;
+                      final path = result.files.single.path;
+                      if (path == null) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Importing CSV...')),
+                      );
+                      final file = File(path);
+                      final csvContent = await file.readAsString();
+                      await DatabaseService().importFromCsv(csvContent);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('CSV imported successfully'),
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error importing CSV: $e')),
+                      );
+                    }
+                  },
                 ),
+                const Divider(),
+
                 ListTile(
                   leading: const Icon(Icons.edit),
                   title: const Text('Income Sources'),
@@ -219,6 +234,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         builder: (_) => const EditSourcesScreen(),
                       ),
                     );
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.delete_forever, color: Colors.red),
+                  title: const Text('Clear Database'),
+                  subtitle: const Text(
+                    'Delete all transactions, savings, and sources',
+                  ),
+                  trailing: const Icon(Icons.warning, color: Colors.red),
+                  onTap: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Clear Database'),
+                        content: const Text(
+                          'This will permanently delete all your transactions, savings accounts, and sources. This action cannot be undone. Are you sure?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                            ),
+                            child: const Text('Clear'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      try {
+                        await DatabaseService().clearDatabase();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Database cleared successfully'),
+                          ),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error clearing database: $e'),
+                          ),
+                        );
+                      }
+                    }
                   },
                 ),
                 const Divider(),

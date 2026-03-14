@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/transaction.dart' as model;
@@ -432,6 +433,62 @@ class DatabaseService {
     return filePath;
   }
 
+  Future<void> importFromCsv(String csvContent) async {
+    final csvData = const CsvToListConverter().convert(csvContent);
+    if (csvData.isEmpty) return;
+
+    final headers = csvData.first.map((e) => e.toString()).toList();
+    final expectedHeaders = [
+      'type',
+      'id',
+      'date',
+      'name',
+      'amount',
+      'amount_usd',
+      'source',
+      'currency',
+      'notes',
+    ];
+    // if (headers != expectedHeaders) {
+    //   throw Exception('Invalid CSV format. Expected headers: $expectedHeaders');
+    // }
+    if (!listEquals(headers, expectedHeaders)) {
+      throw Exception('Invalid CSV format. Expected headers: $expectedHeaders');
+    }
+
+    for (int i = 1; i < csvData.length; i++) {
+      final row = csvData[i];
+      final type = row[0]?.toString() ?? '';
+      if (type == 'income' || type == 'expense') {
+        // Insert transaction
+        final transaction = model.Transaction(
+          id: null, // Let DB assign ID
+          type: type,
+          date: DateTime.parse(row[2]?.toString() ?? ''),
+          name: row[3]?.toString() ?? '',
+          amount: double.tryParse(row[4]?.toString() ?? '0') ?? 0.0,
+          amount_usd: double.tryParse(row[5]?.toString() ?? '0') ?? 0.0,
+          source: row[6]?.toString(),
+          currency: row[7]?.toString() ?? 'UAH',
+        );
+        await insertTransaction(transaction);
+      } else if (type == 'savings') {
+        // Insert savings account
+        final savingsAccount = SavingsAccount(
+          id: null,
+          name: row[3]?.toString() ?? '',
+          amount: double.tryParse(row[4]?.toString() ?? '0') ?? 0.0,
+          amountUSD: double.tryParse(row[5]?.toString() ?? '0') ?? 0.0,
+          notes: row[8]?.toString(),
+          currency: row[7]?.toString() ?? 'UAH',
+          lastUpdated: DateTime.parse(row[2]?.toString() ?? ''),
+        );
+        await insertSavingsAccount(savingsAccount);
+      }
+      // Skip unknown types
+    }
+  }
+
   /// Close the open database connection if any.
   Future<void> closeDatabase() async {
     if (_database != null) {
@@ -440,6 +497,15 @@ class DatabaseService {
       } catch (_) {}
       _database = null;
     }
+  }
+
+  Future<void> clearDatabase() async {
+    Database db = await database;
+    // Clear all data tables (keep settings if desired)
+    await db.delete(TransactionsFields.tableName);
+    await db.delete(SavingsAccountsFields.tableName);
+    await db.delete(SourcesFields.tableName);
+    // Optionally clear settings: await db.delete(SettingsFields.tableName);
   }
 
   /// Import a database file from [sourcePath], replacing the current database.
