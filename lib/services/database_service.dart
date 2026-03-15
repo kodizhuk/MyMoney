@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/transaction.dart' as model;
@@ -10,7 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:csv/csv.dart';
 import 'dart:io' as io;
-import 'package:share_plus/share_plus.dart'; // Add this import
+import 'package:share_plus/share_plus.dart';
 
 class TransactionsFields {
   static const String tableName = 'transactions';
@@ -434,8 +433,28 @@ class DatabaseService {
   }
 
   Future<void> importFromCsv(String csvContent) async {
-    final csvData = const CsvToListConverter().convert(csvContent);
+    // normalize line endings to \n for consistent parsing
+    //csvData - a list of rows
+    // csvContent - the raw CSV string to parse and import
+
+    //fix csv
+
+    final csvData = const CsvToListConverter().convert(csvContent, eol: '\n');
+
+    if (csvData.isNotEmpty) {
+      final headers = csvData[0].map((e) => e.toString().trim()).toList();
+      print('Headers: $headers');
+      print('Header count: ${headers.length}');
+    } else {
+      print('No data');
+    }
+
     if (csvData.isEmpty) return;
+
+    //normalize headers, delete \r if present
+    csvData[0] = csvData[0]
+        .map((e) => e.toString().replaceAll('\r', ''))
+        .toList();
 
     final headers = csvData.first.map((e) => e.toString()).toList();
     final expectedHeaders = [
@@ -449,12 +468,10 @@ class DatabaseService {
       'currency',
       'notes',
     ];
+
     // if (headers != expectedHeaders) {
     //   throw Exception('Invalid CSV format. Expected headers: $expectedHeaders');
     // }
-    if (!listEquals(headers, expectedHeaders)) {
-      throw Exception('Invalid CSV format. Expected headers: $expectedHeaders');
-    }
 
     for (int i = 1; i < csvData.length; i++) {
       final row = csvData[i];

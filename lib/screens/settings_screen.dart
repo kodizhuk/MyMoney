@@ -186,7 +186,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     }
                   },
                 ),
+
                 const Divider(),
+
                 ListTile(
                   leading: const Icon(Icons.upload),
                   title: const Text('Import All'),
@@ -218,22 +220,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         SnackBar(content: Text('Error importing CSV: $e')),
                       );
                     }
-                  },
-                ),
-                const Divider(),
-
-                ListTile(
-                  leading: const Icon(Icons.edit),
-                  title: const Text('Income Sources'),
-                  subtitle: const Text('Manage income sources and categories'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const EditSourcesScreen(),
-                      ),
-                    );
                   },
                 ),
                 const Divider(),
@@ -285,6 +271,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     }
                   },
                 ),
+
+                const Divider(),
+
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: const Text('Income Sources'),
+                  subtitle: const Text('Manage income sources and categories'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EditSourcesScreen(),
+                      ),
+                    );
+                  },
+                ),
+
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.edit),
